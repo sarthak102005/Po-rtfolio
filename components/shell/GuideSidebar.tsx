@@ -108,7 +108,7 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            download={href.endsWith(".pdf") ? "Sarthak_Resume.pdf" : undefined}
+            
             className={linkClass(href)}
             title={!open ? label : undefined}
             aria-label={label}

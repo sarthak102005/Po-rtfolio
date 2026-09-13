@@ -151,7 +151,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
             href={profile.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            download="Sarthak_Resume.pdf"
+            
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#0f0f0f] dark:border-[#f1f1f1] text-[#0f0f0f] dark:text-[#f1f1f1] text-sm font-medium hover:bg-[#0f0f0f] hover:text-white dark:hover:bg-[#f1f1f1] dark:hover:text-[#0f0f0f] transition-all"
             aria-label="View or download resume"
           >
@@ -250,7 +250,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                     href={profile.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    download="Sarthak_Resume.pdf"
+                    
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
                   >

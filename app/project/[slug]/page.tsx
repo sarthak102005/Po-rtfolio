@@ -196,7 +196,7 @@ export default async function ProjectWatchPage({ params }: Props) {
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              download="Sarthak_Resume.pdf"
+              
               className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ff0033] text-white text-sm font-semibold hover:bg-[#cc0000] transition-colors"
             >
               <FileText size={14} />

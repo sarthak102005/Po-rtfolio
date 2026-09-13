@@ -57,7 +57,7 @@ export default function YouPage() {
           href={profile.resumeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          download="Sarthak_Resume.pdf"
+          
           className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#e5e5e5] dark:border-[#282828] bg-white dark:bg-[#181818] hover:bg-[#f9f9f9] dark:hover:bg-[#212121] hover:shadow-sm transition-all text-center"
         >
           <FileText size={22} className="text-[#ff0033]" />

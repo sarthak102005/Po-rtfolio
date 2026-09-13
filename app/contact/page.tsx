@@ -100,7 +100,7 @@ export default function ContactPage() {
           href={profile.resumeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          download="Sarthak_Resume.pdf"
+          
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#ff0033] text-white text-sm font-semibold hover:bg-[#cc0000] transition-colors mt-2 shadow-sm"
         >
           <FileText size={16} />

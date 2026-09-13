@@ -89,7 +89,7 @@ export default function HomePage() {
                   href={profile.resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  download="Sarthak_Resume.pdf"
+                  
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-[#0f0f0f] text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
                 >
                   <FileText size={14} />
@@ -109,12 +109,55 @@ export default function HomePage() {
 
         {/* Chip-filtered shelves */}
         {selectedChip !== "All" && selectedChip !== "All Projects" ? (
-          /* Filtered view */
-          <ProjectShelf
-            title={`${selectedChip} Projects`}
-            projects={filtered}
-            seeAllHref="/projects"
-          />
+          filtered.length > 0 ? (
+            <ProjectShelf
+              title={`${selectedChip} Projects`}
+              projects={filtered}
+              seeAllHref="/projects"
+            />
+          ) : selectedChip === "Core CS" ? (
+            <div className="py-16 text-center max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-full bg-[#f2f2f2] dark:bg-[#272727] text-3xl flex items-center justify-center mx-auto mb-4" aria-hidden="true">
+                💻
+              </div>
+              <h2 className="text-lg font-bold text-[#0f0f0f] dark:text-[#f1f1f1] mb-2">
+                Core CS Fundamentals & Coursework
+              </h2>
+              <p className="text-sm text-[#606060] dark:text-[#aaaaaa] mb-6 leading-relaxed">
+                Sarthak&apos;s core computer science foundations—including Operating Systems, DBMS, Computer Networks, Object-Oriented Programming, and Data Structures—are detailed in the Skills section.
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <Link
+                  href="/skills"
+                  className="px-5 py-2.5 rounded-full bg-[#ff0033] text-white text-sm font-semibold hover:bg-[#cc0000] transition-colors"
+                >
+                  View Core CS Skills
+                </Link>
+                <button
+                  onClick={() => setSelectedChip("All")}
+                  className="px-4 py-2.5 rounded-full border border-[#e5e5e5] dark:border-[#383838] text-sm font-medium hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
+                >
+                  Show all projects
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="py-16 text-center">
+              <p className="text-3xl mb-3" aria-hidden="true">🔍</p>
+              <p className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-1">
+                No projects found for &quot;{selectedChip}&quot;
+              </p>
+              <p className="text-sm text-[#606060] dark:text-[#aaaaaa]">
+                Try a different filter category
+              </p>
+              <button
+                onClick={() => setSelectedChip("All")}
+                className="mt-4 px-5 py-2 rounded-full bg-[#0f0f0f] dark:bg-[#f1f1f1] text-white dark:text-[#0f0f0f] text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Show all projects
+              </button>
+            </div>
+          )
         ) : (
           <>
             {/* Primary Projects shelf */}
@@ -285,7 +328,7 @@ export default function HomePage() {
                     href={profile.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    download="Sarthak_Resume.pdf"
+                    
                     className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#e5e5e5] dark:border-[#383838] bg-white dark:bg-[#212121] text-[#0f0f0f] dark:text-[#f1f1f1] text-sm font-semibold hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
                   >
                     <FileText size={14} />

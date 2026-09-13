@@ -62,7 +62,7 @@ export default function AboutPage() {
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              download="Sarthak_Resume.pdf"
+              
               className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0f0f0f] dark:bg-[#f1f1f1] text-white dark:text-[#0f0f0f] text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <FileText size={14} />
