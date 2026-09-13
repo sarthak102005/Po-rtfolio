@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --yt-white: #ffffff;
+  --yt-bg: #f9f9f9;
+  --yt-bg2: #f2f2f2;
+  --yt-text: #0f0f0f;
+  --yt-muted: #606060;
+  --yt-border: #e5e5e5;
+  --yt-red: #ff0033;
+  --yt-red-dark: #cc0000;
+  --yt-hover: #f2f2f2;
+  --yt-active-bg: #e5e5e5;
+  --sidebar-expanded: 240px;
+  --sidebar-collapsed: 72px;
+  --topbar-height: 56px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--yt-white);
+  color: var(--yt-text);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #909090;
+}
+
+/* Horizontal chip scrollbar — hide it */
+.chips-scroll::-webkit-scrollbar {
+  height: 0;
+}
+.chips-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--yt-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+
+/* Splash overlay */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0f0f0f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card thumbnail aspect ratio */
+.thumbnail-container {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--yt-bg2);
+  position: relative;
+}
+
+/* Sidebar transition */
+.sidebar {
+  transition: width 200ms ease, transform 200ms ease;
+  will-change: width;
+}
+
+/* App layout */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  padding-top: var(--topbar-height);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* Grid utilities */
+.feed-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 767px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .feed-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .feed-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .feed-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Max content width for ultrawide */
+.content-wrap {
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Chip pill */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms ease;
+  user-select: none;
+  border: none;
+  outline: none;
+}
+
+.chip-active {
+  background: #0f0f0f;
+  color: #ffffff;
+}
+
+.chip-inactive {
+  background: #f2f2f2;
+  color: #0f0f0f;
+}
+
+.chip-inactive:hover {
+  background: #e5e5e5;
+}
