@@ -19,7 +19,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#0f0f0f] border-t border-[#e5e5e5] dark:border-[#272727] flex md:hidden transition-colors"
+      className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-[#0f0f0f] border-t border-[#e5e5e5] dark:border-[#272727] flex md:hidden transition-colors"
       style={{ height: 56 }}
       aria-label="Mobile bottom navigation"
     >

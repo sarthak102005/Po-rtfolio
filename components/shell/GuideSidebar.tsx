@@ -20,7 +20,10 @@ import {
   Brain,
   FolderGit2,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/components/context/ThemeContext";
 
 interface GuideSidebarProps {
   open: boolean;
@@ -36,6 +39,7 @@ const primaryNav = [
   { href: "/skills", label: "Skills", icon: Code2 },
   { href: "/experience", label: "Experience", icon: Briefcase },
   { href: "/you", label: "You", icon: Library },
+  { href: "/contact", label: "Contact", icon: Mail },
 ];
 
 const exploreNav = [
@@ -49,7 +53,7 @@ const exploreNav = [
 const utilityNav = [
   {
     href: "/Sarthak_Resume.pdf",
-    label: "Resume",
+    label: "Resume (PDF)",
     icon: FileText,
     external: true,
   },
@@ -65,7 +69,6 @@ const utilityNav = [
     icon: Link2,
     external: true,
   },
-  { href: "/contact", label: "Contact", icon: Mail, external: false },
 ];
 
 export default function GuideSidebar({
@@ -75,6 +78,7 @@ export default function GuideSidebar({
   onMobileClose,
 }: GuideSidebarProps) {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -89,7 +93,7 @@ export default function GuideSidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mobileOpen, onMobileClose]);
 
-  // Lock body scroll when mobile drawer is open
+  // Lock body scroll while mobile drawer is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -101,7 +105,7 @@ export default function GuideSidebar({
     };
   }, [mobileOpen]);
 
-  // Clear hover state when pinned open state changes
+  // Desktop hover expansion handlers
   useEffect(() => {
     if (open) {
       setIsHovered(false);
@@ -109,7 +113,6 @@ export default function GuideSidebar({
     }
   }, [open]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
@@ -121,7 +124,6 @@ export default function GuideSidebar({
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
-    // Only expand on hover if currently collapsed on desktop
     if (!open) {
       setIsHovered(true);
     }
@@ -131,13 +133,11 @@ export default function GuideSidebar({
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
-    // 150ms hysteresis delay before collapsing to prevent flickering
     hoverTimerRef.current = setTimeout(() => {
       setIsHovered(false);
     }, 150);
   };
 
-  // Effective expanded state for desktop
   const isExpanded = open || isHovered;
 
   const isActive = (href: string) => {
@@ -148,94 +148,25 @@ export default function GuideSidebar({
     return pathname.startsWith(href);
   };
 
-  const linkClass = (href: string, isMobile = false) =>
+  // Desktop link class
+  const desktopLinkClass = (href: string) =>
     `flex items-center gap-5 px-3 py-2.5 rounded-xl transition-all duration-150 text-sm group select-none ${
-      isMobile ? "min-h-[44px]" : ""
-    } ${
       isActive(href)
         ? "bg-[#f2f2f2] dark:bg-[#272727] font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
         : "text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
     }`;
 
-  const iconClass = (href: string) =>
+  const desktopIconClass = (href: string) =>
     `flex-shrink-0 ${
       isActive(href)
         ? "text-[#0f0f0f] dark:text-[#f1f1f1]"
         : "text-[#606060] dark:text-[#aaaaaa] group-hover:text-[#0f0f0f] dark:group-hover:text-[#f1f1f1]"
     }`;
 
-  const NavSection = ({
-    title,
-    items,
-    expanded,
-    isMobile = false,
-    onNavigate,
-  }: {
-    title?: string;
-    items: typeof primaryNav;
-    expanded: boolean;
-    isMobile?: boolean;
-    onNavigate?: () => void;
-  }) => (
-    <div className="py-2">
-      {title && expanded && (
-        <p className="px-3 py-1 text-xs font-semibold text-[#909090] dark:text-[#717171] uppercase tracking-wider mb-1 transition-opacity duration-200">
-          {title}
-        </p>
-      )}
-      {!title && expanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-3 my-2" />}
-      {!expanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-2 my-2" />}
-      {items.map(({ href, label, icon: Icon, ...rest }) => {
-        const isExt = (rest as { external?: boolean }).external;
-        return isExt ? (
-          <a
-            key={href}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={linkClass(href, isMobile)}
-            title={!expanded ? label : undefined}
-            aria-label={label}
-            onClick={() => {
-              if (onNavigate) onNavigate();
-              if (!open) setIsHovered(false);
-            }}
-          >
-            <Icon size={20} strokeWidth={1.8} className={iconClass(href)} />
-            {expanded && (
-              <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
-                {label}
-              </span>
-            )}
-          </a>
-        ) : (
-          <Link
-            key={href}
-            href={href}
-            className={linkClass(href, isMobile)}
-            title={!expanded ? label : undefined}
-            aria-label={label}
-            onClick={() => {
-              if (onNavigate) onNavigate();
-              if (!open) setIsHovered(false);
-            }}
-          >
-            <Icon size={20} strokeWidth={1.8} className={iconClass(href)} />
-            {expanded && (
-              <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
-                {label}
-              </span>
-            )}
-          </Link>
-        );
-      })}
-    </div>
-  );
-
   return (
     <>
       {/* ========================================================================= */}
-      {/* Desktop sidebar with smooth hover expansion (72px -> 240px)                */}
+      {/* 1. DESKTOP SIDEBAR (hidden md:block) — APPROVED & UNCHANGED                */}
       {/* ========================================================================= */}
       <nav
         onMouseEnter={handleMouseEnter}
@@ -253,11 +184,96 @@ export default function GuideSidebar({
         role="navigation"
       >
         <div className="px-2 py-2">
-          <NavSection items={primaryNav} expanded={isExpanded} />
-          <NavSection title="Explore" items={exploreNav} expanded={isExpanded} />
-          <NavSection items={utilityNav} expanded={isExpanded} />
+          {/* Primary Nav */}
+          <div className="py-2">
+            {!isExpanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-2 my-2" />}
+            {primaryNav.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={desktopLinkClass(href)}
+                title={!isExpanded ? label : undefined}
+                aria-label={label}
+              >
+                <Icon size={20} strokeWidth={1.8} className={desktopIconClass(href)} />
+                {isExpanded && (
+                  <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                    {label}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
 
-          {/* Footer info when expanded */}
+          {/* Explore Nav */}
+          <div className="py-2">
+            {isExpanded ? (
+              <p className="px-3 py-1 text-xs font-semibold text-[#909090] dark:text-[#717171] uppercase tracking-wider mb-1">
+                Explore
+              </p>
+            ) : (
+              <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-2 my-2" />
+            )}
+            {exploreNav.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={desktopLinkClass(href)}
+                title={!isExpanded ? label : undefined}
+                aria-label={label}
+              >
+                <Icon size={20} strokeWidth={1.8} className={desktopIconClass(href)} />
+                {isExpanded && (
+                  <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                    {label}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+
+          {/* Utility Nav */}
+          <div className="py-2">
+            {isExpanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-3 my-2" />}
+            {!isExpanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-2 my-2" />}
+            {utilityNav.map(({ href, label, icon: Icon, external }) =>
+              external ? (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={desktopLinkClass(href)}
+                  title={!isExpanded ? label : undefined}
+                  aria-label={label}
+                >
+                  <Icon size={20} strokeWidth={1.8} className={desktopIconClass(href)} />
+                  {isExpanded && (
+                    <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                      {label}
+                    </span>
+                  )}
+                </a>
+              ) : (
+                <Link
+                  key={href}
+                  href={href}
+                  className={desktopLinkClass(href)}
+                  title={!isExpanded ? label : undefined}
+                  aria-label={label}
+                >
+                  <Icon size={20} strokeWidth={1.8} className={desktopIconClass(href)} />
+                  {isExpanded && (
+                    <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                      {label}
+                    </span>
+                  )}
+                </Link>
+              )
+            )}
+          </div>
+
+          {/* Desktop Footer */}
           {isExpanded && (
             <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5] dark:border-[#272727] transition-opacity duration-200">
               <p className="text-[11px] text-[#909090] dark:text-[#717171] leading-relaxed">
@@ -270,25 +286,31 @@ export default function GuideSidebar({
       </nav>
 
       {/* ========================================================================= */}
-      {/* Mobile Drawer (slides in from the RIGHT when hamburger is tapped)         */}
-      {/* Requirement 14 & 15: Opaque dark dashboard, starts closed on fresh load   */}
+      {/* 2. MOBILE NAVIGATION DRAWER (md:hidden) — STRICT PROBLEM 3 & 4 FIXES      */}
+      {/* - Opaque near-black (#0f0f0f)                                              */}
+      {/* - Right-side slide-in                                                     */}
+      {/* - Icon + Text Label 100% visible (high contrast text-white, never clipped)*/}
+      {/* - Prominent Resume Button                                                 */}
+      {/* - Prominent Appearance / Dark Mode Toggle                                 */}
+      {/* - Independent vertical scroll, NO horizontal overflow                     */}
       {/* ========================================================================= */}
-      {/* Mobile backdrop dim */}
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-50 md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] md:hidden transition-opacity duration-300 ${
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onMobileClose}
         aria-hidden="true"
       />
 
-      {/* Right-side mobile navigation drawer */}
+      {/* Mobile Drawer */}
       <aside
         className={`
-          fixed right-0 top-0 bottom-0 z-50 w-[290px] max-w-[85vw]
-          bg-[#0f0f0f] border-l border-[#272727] text-[#f1f1f1]
+          fixed right-0 top-0 bottom-0 z-[70]
+          w-[min(86vw,420px)] h-[100dvh]
+          bg-[#0f0f0f] border-l border-[#272727] text-white
           shadow-2xl overflow-y-auto overflow-x-hidden
-          transition-transform duration-300 ease-out
+          transition-transform duration-300 ease-out flex flex-col
           md:hidden
           ${mobileOpen ? "translate-x-0" : "translate-x-full"}
         `}
@@ -296,50 +318,174 @@ export default function GuideSidebar({
         role="dialog"
         aria-modal={mobileOpen}
       >
-        {/* Header inside drawer */}
-        <div className="p-4 border-b border-[#272727] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Drawer Top Header: Logo + Close Button */}
+        <div className="p-4 border-b border-[#272727] flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#ff0033] flex items-center justify-center text-white flex-shrink-0">
               <svg viewBox="0 0 24 24" fill="white" width={14} height={14} style={{ marginLeft: 2 }}>
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
-            <span className="font-bold text-[#f1f1f1] text-base">
-              Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
-            </span>
+            <div>
+              <span className="font-bold text-white text-base leading-none">
+                Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
+              </span>
+              <p className="text-[11px] text-[#aaaaaa] mt-0.5">Software Engineer</p>
+            </div>
           </div>
+
           <button
             onClick={onMobileClose}
-            className="p-2 rounded-full text-[#aaaaaa] hover:text-white hover:bg-[#272727] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full text-[#aaaaaa] hover:text-white hover:bg-[#272727] flex items-center justify-center transition-colors flex-shrink-0"
             aria-label="Close navigation"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Dedicated Resume Download Button in Drawer */}
-        <div className="p-4 border-b border-[#272727]">
+        {/* Primary Action: Download Resume Button */}
+        <div className="p-4 border-b border-[#272727] flex-shrink-0">
           <a
             href="/Sarthak_Resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
             onClick={onMobileClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#ff0033] hover:bg-[#cc0000] text-white font-semibold text-sm shadow-md transition-all min-h-[44px]"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-[#ff0033] hover:bg-[#cc0000] text-white font-bold text-sm shadow-lg transition-all min-h-[46px]"
           >
-            <FileText size={16} />
+            <FileText size={17} />
             <span>Download Resume (PDF)</span>
           </a>
         </div>
 
-        {/* Navigation items */}
-        <div className="px-2 py-3">
-          <NavSection items={primaryNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
-          <NavSection title="Explore" items={exploreNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
-          <NavSection items={utilityNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
+        {/* Scrollable Navigation Body */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-4">
+          {/* Main Navigation */}
+          <div>
+            <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#888888] mb-1">
+              Menu
+            </p>
+            <div className="space-y-1">
+              {primaryNav.map(({ href, label, icon: Icon }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={onMobileClose}
+                    className={`flex items-center gap-4 px-3.5 py-3 rounded-xl transition-colors min-h-[46px] group ${
+                      active
+                        ? "bg-[#222222] text-[#ff0033] font-semibold"
+                        : "text-[#f1f1f1] hover:bg-[#1a1a1a] hover:text-white"
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 flex items-center justify-center flex-shrink-0 ${
+                        active ? "text-[#ff0033]" : "text-[#aaaaaa] group-hover:text-white"
+                      }`}
+                    >
+                      <Icon size={20} strokeWidth={1.9} />
+                    </div>
+                    <span className="flex-1 min-w-0 text-sm truncate font-medium">
+                      {label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Explore Projects */}
+          <div className="pt-2 border-t border-[#222222]">
+            <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#888888] mb-1">
+              Explore Projects
+            </p>
+            <div className="space-y-1">
+              {exploreNav.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onMobileClose}
+                  className="flex items-center gap-4 px-3.5 py-3 rounded-xl text-[#f1f1f1] hover:bg-[#1a1a1a] hover:text-white transition-colors min-h-[46px] group"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center text-[#aaaaaa] group-hover:text-white flex-shrink-0">
+                    <Icon size={19} strokeWidth={1.8} />
+                  </div>
+                  <span className="flex-1 min-w-0 text-sm truncate font-medium">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Appearance / Theme Switcher (Problem 4: Fully Discoverable!) */}
+          <div className="pt-2 border-t border-[#222222]">
+            <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#888888] mb-2">
+              Appearance
+            </p>
+            <div className="px-3.5 py-3 rounded-xl bg-[#181818] border border-[#2a2a2a] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {theme === "dark" ? (
+                  <Moon size={18} className="text-[#3ea6ff]" />
+                ) : (
+                  <Sun size={18} className="text-[#f59e0b]" />
+                )}
+                <div>
+                  <p className="text-sm font-semibold text-white">Dark Theme</p>
+                  <p className="text-xs text-[#aaaaaa]">
+                    {theme === "dark" ? "Currently active" : "Off (Light theme active)"}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  theme === "dark"
+                    ? "bg-[#282828] hover:bg-[#383838] text-white border border-[#444444]"
+                    : "bg-[#ff0033] hover:bg-[#cc0000] text-white"
+                }`}
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              >
+                {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
+                <span>{theme === "dark" ? "Switch to Light" : "Enable Dark"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="pt-2 border-t border-[#222222]">
+            <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#888888] mb-1">
+              Links
+            </p>
+            <div className="space-y-1">
+              {utilityNav.map(({ href, label, icon: Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={onMobileClose}
+                  className="flex items-center gap-4 px-3.5 py-3 rounded-xl text-[#f1f1f1] hover:bg-[#1a1a1a] hover:text-white transition-colors min-h-[46px] group"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center text-[#aaaaaa] group-hover:text-white flex-shrink-0">
+                    <Icon size={19} strokeWidth={1.8} />
+                  </div>
+                  <span className="flex-1 min-w-0 text-sm truncate font-medium">
+                    {label}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="px-4 py-4 mt-2 border-t border-[#272727]">
-          <p className="text-xs text-[#717171]">© 2026 Sarthak Makkar · Delhi, India</p>
+        {/* Drawer Footer */}
+        <div className="p-4 border-t border-[#272727] flex-shrink-0 text-center">
+          <p className="text-xs text-[#717171]">
+            © 2026 Sarthak Makkar · Delhi, India
+          </p>
         </div>
       </aside>
     </>

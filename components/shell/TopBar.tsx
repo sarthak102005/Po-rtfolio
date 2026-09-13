@@ -173,7 +173,7 @@ export default function TopBar({
     setIsDropdownOpen(true);
     setTimeout(() => {
       mobileSearchRef.current?.focus();
-    }, 50);
+    }, 60);
   };
 
   const closeMobileSearch = () => {
@@ -239,7 +239,7 @@ export default function TopBar({
       role="banner"
     >
       {/* ========================================================================= */}
-      {/* 1. DESKTOP HEADER (md:flex) — EXACTLY AS APPROVED, UNCHANGED               */}
+      {/* 1. DESKTOP HEADER (md:flex) — APPROVED & 100% UNCHANGED                   */}
       {/* ========================================================================= */}
       <div className="hidden md:flex items-center h-full px-4 gap-2 max-w-[2560px] mx-auto w-full">
         {/* Left: Hamburger + Logo */}
@@ -574,15 +574,17 @@ export default function TopBar({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. DEDICATED MOBILE HEADER (md:hidden) — PURPOSE-BUILT                     */}
+      {/* 2. DEDICATED MOBILE HEADER (md:hidden) — STRICT PROBLEM 1 & 2 FIXES        */}
+      {/* STATE A: Hamburger + Viewport-Centered Logo + Compact Search Icon          */}
+      {/* STATE B: Full-width expanded search input consuming 100% width             */}
       {/* ========================================================================= */}
       <div className="flex md:hidden items-center h-full w-full relative px-2">
         {mobileSearchActive ? (
           /* --------------------------------------------------------------------- */
-          /* MOBILE STATE B: Full-Width Search Input (100% Usable Width)           */
-          /* Requirements 7, 8, 9, 20: Typable, readable >=16px, never cramped      */
+          /* STATE B: Full-Width Search Input (100% Usable Width)                  */
+          /* Typable, readable >=16px, never cramped, clear X button               */
           /* --------------------------------------------------------------------- */
-          <div className="flex items-center h-full w-full gap-2 z-50">
+          <div className="flex items-center h-full w-full gap-2 z-20">
             {/* Back button ← */}
             <button
               type="button"
@@ -605,8 +607,8 @@ export default function TopBar({
                   setSelectedIndex(-1);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search projects & sidebar..."
-                className="w-full h-10 pl-3.5 pr-9 text-base border border-[#d3d3d3] dark:border-[#303030] rounded-full focus:outline-none focus:border-[#1c62b9] bg-[#f2f2f2] dark:bg-[#181818] text-[#0f0f0f] dark:text-[#f1f1f1] placeholder-[#909090] dark:placeholder-[#717171] transition-colors"
+                placeholder="Search projects & navigation..."
+                className="w-full h-10 pl-4 pr-10 text-base border border-[#d3d3d3] dark:border-[#303030] rounded-full focus:outline-none focus:border-[#1c62b9] bg-[#f2f2f2] dark:bg-[#181818] text-[#0f0f0f] dark:text-[#f1f1f1] placeholder-[#909090] dark:placeholder-[#717171] transition-colors"
                 style={{ fontSize: "16px" }}
                 aria-label="Search projects and navigation"
                 autoFocus
@@ -615,7 +617,7 @@ export default function TopBar({
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-[#606060] dark:text-[#aaaaaa] hover:text-[#0f0f0f] dark:hover:text-[#f1f1f1]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[32px] min-h-[32px] flex items-center justify-center text-[#606060] dark:text-[#aaaaaa] hover:text-[#0f0f0f] dark:hover:text-[#f1f1f1]"
                   aria-label="Clear search text"
                 >
                   <X size={16} />
@@ -627,10 +629,10 @@ export default function TopBar({
             <button
               type="button"
               onClick={() => handleSearch()}
-              className="min-w-[44px] min-h-[44px] px-3 rounded-full bg-[#0f0f0f] dark:bg-[#f1f1f1] text-white dark:text-[#0f0f0f] text-sm font-semibold flex items-center justify-center flex-shrink-0"
+              className="min-w-[44px] min-h-[44px] px-3.5 rounded-full bg-[#ff0033] hover:bg-[#cc0000] text-white flex items-center justify-center flex-shrink-0 transition-colors"
               aria-label="Submit search"
             >
-              <Search size={16} />
+              <Search size={18} />
             </button>
 
             {/* Mobile Dropdown Suggestions */}
@@ -657,7 +659,7 @@ export default function TopBar({
                           aria-selected={isSelected}
                           type="button"
                           onClick={() => handleSelectSidebarItem(item)}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 transition-colors text-left min-h-[44px] ${
+                          className={`w-full flex items-center justify-between px-4 py-3 transition-colors text-left min-h-[46px] ${
                             isSelected
                               ? "bg-[#e5e5e5] dark:bg-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1]"
                               : "hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] text-[#0f0f0f] dark:text-[#f1f1f1]"
@@ -692,7 +694,7 @@ export default function TopBar({
                           aria-selected={isSelected}
                           type="button"
                           onClick={() => handleSelectProject(p.slug)}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 transition-colors text-left min-h-[44px] ${
+                          className={`w-full flex items-center justify-between px-4 py-3 transition-colors text-left min-h-[46px] ${
                             isSelected
                               ? "bg-[#e5e5e5] dark:bg-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1]"
                               : "hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] text-[#0f0f0f] dark:text-[#f1f1f1]"
@@ -730,10 +732,12 @@ export default function TopBar({
           </div>
         ) : (
           /* --------------------------------------------------------------------- */
-          /* MOBILE STATE A: Standard Header with Mathematically Centered Logo     */
-          /* Requirements 1, 2, 3, 4, 19: Perfect viewport centering, clean layout */
+          /* STATE A: Compact Normal Mobile Header                                 */
+          /* Left: Hamburger                                                       */
+          /* Center: Mathematically Centered YouTube-Inspired Logo (Viewport 50%)  */
+          /* Right: Compact Search Trigger ONLY (Resume & Theme in Drawer)         */
           /* --------------------------------------------------------------------- */
-          <>
+          <div className="flex items-center justify-between h-full w-full relative">
             {/* Left: Hamburger Button (44x44 Touch Target) */}
             <button
               onClick={onMenuClick}
@@ -744,14 +748,14 @@ export default function TopBar({
             </button>
 
             {/* Center: Mathematically & Visually Centered YouTube-Inspired Logo */}
+            {/* position: absolute; left: 50%; transform: translateX(-50%)        */}
             {/* Absolute positioning relative to viewport guarantees true center  */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto flex items-center justify-center z-10">
               <Link
                 href="/"
-                className="flex items-center gap-1.5 group select-none py-1"
+                className="flex items-center gap-2 group select-none py-1"
                 aria-label="Sarthak's Portfolio — Home"
               >
-                {/* YouTube Red play tile */}
                 <div
                   className="flex items-center justify-center rounded-lg bg-[#ff0033] flex-shrink-0"
                   style={{ width: 28, height: 28 }}
@@ -761,50 +765,23 @@ export default function TopBar({
                   </svg>
                 </div>
                 <span className="font-bold text-[#0f0f0f] dark:text-[#f1f1f1] text-base tracking-tight whitespace-nowrap">
-                  Sarthak<span className="text-[#ff0033]">&apos;s</span>
+                  Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
                 </span>
               </Link>
             </div>
 
-            {/* Right: Compact Search Trigger + Resume + Theme Switcher */}
-            <div className="flex items-center gap-1 flex-shrink-0 z-10 ml-auto">
-              {/* Compact Search Button */}
+            {/* Right: Compact Search Trigger ONLY (Eliminating Collision) */}
+            <div className="flex items-center flex-shrink-0 z-10">
               <button
                 ref={mobileSearchTriggerRef}
                 onClick={openMobileSearch}
-                className="p-2 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+                className="p-2.5 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                 aria-label="Search projects"
               >
-                <Search size={19} strokeWidth={2} />
-              </button>
-
-              {/* Primary Resume CTA */}
-              <a
-                href={profile.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#0f0f0f] dark:border-[#f1f1f1] text-[#0f0f0f] dark:text-[#f1f1f1] text-xs font-semibold hover:bg-[#0f0f0f] hover:text-white dark:hover:bg-[#f1f1f1] dark:hover:text-[#0f0f0f] transition-all min-h-[34px]"
-                aria-label="Resume"
-              >
-                <FileText size={13} />
-                <span>Resume</span>
-              </a>
-
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] min-w-[38px] min-h-[38px] flex items-center justify-center transition-colors"
-                aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-                title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-              >
-                {theme === "dark" ? (
-                  <Sun size={18} strokeWidth={1.8} className="text-[#f1f1f1]" />
-                ) : (
-                  <Moon size={18} strokeWidth={1.8} className="text-[#0f0f0f]" />
-                )}
+                <Search size={21} strokeWidth={2} />
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </header>
