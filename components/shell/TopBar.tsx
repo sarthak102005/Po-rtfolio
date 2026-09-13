@@ -57,6 +57,33 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
     query.trim().length > 0 &&
     (suggestions.projects.length > 0 || suggestions.sidebarItems.length > 0);
 
+  // Unified flat list of dropdown items for keyboard navigation
+  const allItems = useMemo(() => {
+    const items: Array<
+      | { type: "sidebar"; data: SidebarSearchItem }
+      | { type: "project"; data: typeof projects[0] }
+      | { type: "view_all" }
+    > = [];
+
+    suggestions.sidebarItems.forEach((item) => {
+      items.push({ type: "sidebar", data: item });
+    });
+    suggestions.projects.forEach((item) => {
+      items.push({ type: "project", data: item });
+    });
+    if (query.trim().length > 0) {
+      items.push({ type: "view_all" });
+    }
+    return items;
+  }, [suggestions, query]);
+
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  // Reset selectedIndex when suggestions change or dropdown closes
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [query, isDropdownOpen]);
+
   // "/" shortcut to focus search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -68,6 +95,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
         setProfileOpen(false);
         setNotifOpen(false);
         setIsDropdownOpen(false);
+        setSelectedIndex(-1);
         searchRef.current?.blur();
       }
     };
@@ -80,6 +108,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
     const handler = (e: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
         setIsDropdownOpen(false);
+        setSelectedIndex(-1);
       }
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
@@ -92,16 +121,18 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (query.trim()) {
       setIsDropdownOpen(false);
+      setSelectedIndex(-1);
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
   const handleSelectSidebarItem = (item: SidebarSearchItem) => {
     setIsDropdownOpen(false);
+    setSelectedIndex(-1);
     if (item.external) {
       window.open(item.href, "_blank", "noopener,noreferrer");
     } else {
@@ -111,8 +142,53 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
 
   const handleSelectProject = (slug: string) => {
     setIsDropdownOpen(false);
+    setSelectedIndex(-1);
     router.push(`/project/${slug}`);
   };
+
+  // Keyboard navigation handler on search input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isDropdownOpen || allItems.length === 0) {
+      if (e.key === "ArrowDown" && hasSuggestions) {
+        e.preventDefault();
+        setIsDropdownOpen(true);
+        setSelectedIndex(0);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1 < allItems.length ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev - 1 >= 0 ? prev - 1 : allItems.length - 1));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setSelectedIndex(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setSelectedIndex(allItems.length - 1);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setIsDropdownOpen(false);
+      setSelectedIndex(-1);
+    } else if (e.key === "Enter") {
+      if (selectedIndex >= 0 && selectedIndex < allItems.length) {
+        e.preventDefault();
+        const activeItem = allItems[selectedIndex];
+        if (activeItem.type === "sidebar") {
+          handleSelectSidebarItem(activeItem.data);
+        } else if (activeItem.type === "project") {
+          handleSelectProject(activeItem.data.slug);
+        } else if (activeItem.type === "view_all") {
+          handleSearch();
+        }
+      }
+    }
+  };
+
+  let itemCursor = 0;
 
   return (
     <header
@@ -160,7 +236,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
           </Link>
         </div>
 
-        {/* Center: Search Bar + Live Dropdown */}
+        {/* Center: Search Bar + Live Dropdown with Keyboard Navigation */}
         <div ref={searchContainerRef} className="flex-1 flex justify-center px-1 sm:px-4 min-w-0 relative">
           <form
             onSubmit={handleSearch}
@@ -174,8 +250,15 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                 onChange={(e) => {
                   setQuery(e.target.value);
                   setIsDropdownOpen(true);
+                  setSelectedIndex(-1);
                 }}
                 onFocus={() => setIsDropdownOpen(true)}
+                onKeyDown={handleKeyDown}
+                role="combobox"
+                aria-expanded={isDropdownOpen && hasSuggestions}
+                aria-autocomplete="list"
+                aria-controls="search-dropdown-listbox"
+                aria-activedescendant={selectedIndex >= 0 ? `search-item-${selectedIndex}` : undefined}
                 placeholder="Search projects & sidebar (Press '/' to focus)"
                 className="w-full h-9 pl-4 pr-3 text-sm border border-[#d3d3d3] dark:border-[#303030] rounded-l-full focus:outline-none focus:border-[#1c62b9] bg-white dark:bg-[#121212] text-[#0f0f0f] dark:text-[#f1f1f1] placeholder-[#909090] dark:placeholder-[#717171] transition-colors"
                 aria-label="Search portfolio"
@@ -190,9 +273,14 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
             </button>
           </form>
 
-          {/* YouTube-style Search Result Dropdown */}
+          {/* YouTube-style Search Result Dropdown with Full Keyboard Navigation */}
           {isDropdownOpen && hasSuggestions && (
-            <div className="absolute left-1 sm:left-4 right-1 sm:right-4 top-full mt-1.5 max-w-[600px] mx-auto bg-white dark:bg-[#212121] border border-[#e5e5e5] dark:border-[#383838] rounded-2xl shadow-xl z-50 overflow-hidden py-2">
+            <div
+              id="search-dropdown-listbox"
+              role="listbox"
+              aria-label="Search suggestions"
+              className="absolute left-1 sm:left-4 right-1 sm:right-4 top-full mt-1.5 max-w-[600px] mx-auto bg-white dark:bg-[#212121] border border-[#e5e5e5] dark:border-[#383838] rounded-2xl shadow-xl z-50 overflow-hidden py-2"
+            >
               {/* Sidebar items suggestions */}
               {suggestions.sidebarItems.length > 0 && (
                 <div className="pb-1">
@@ -201,16 +289,27 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                   </div>
                   {suggestions.sidebarItems.map((item) => {
                     const Icon = item.icon;
+                    const currentIndex = itemCursor++;
+                    const isSelected = selectedIndex === currentIndex;
+
                     return (
                       <button
                         key={item.id}
+                        id={`search-item-${currentIndex}`}
+                        role="option"
+                        aria-selected={isSelected}
                         type="button"
                         onClick={() => handleSelectSidebarItem(item)}
-                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] transition-colors text-left group"
+                        onMouseEnter={() => setSelectedIndex(currentIndex)}
+                        className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left group ${
+                          isSelected
+                            ? "bg-[#e5e5e5] dark:bg-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1]"
+                            : "hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] text-[#0f0f0f] dark:text-[#f1f1f1]"
+                        }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <Icon size={16} className="text-[#606060] dark:text-[#aaaaaa] flex-shrink-0" />
-                          <span className="text-sm font-medium text-[#0f0f0f] dark:text-[#f1f1f1] truncate">
+                          <span className="text-sm font-medium truncate">
                             {item.label}
                           </span>
                         </div>
@@ -236,42 +335,69 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                   <div className="px-4 py-1 text-[11px] font-semibold text-[#808080] dark:text-[#aaaaaa] uppercase tracking-wider">
                     Projects
                   </div>
-                  {suggestions.projects.map((p) => (
-                    <button
-                      key={p.slug}
-                      type="button"
-                      onClick={() => handleSelectProject(p.slug)}
-                      className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] transition-colors text-left group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Search size={15} className="text-[#606060] dark:text-[#aaaaaa] flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#0f0f0f] dark:text-[#f1f1f1] truncate">
-                            {p.name}
-                          </p>
-                          <p className="text-xs text-[#606060] dark:text-[#aaaaaa] truncate">
-                            {p.subtitle}
-                          </p>
+                  {suggestions.projects.map((p) => {
+                    const currentIndex = itemCursor++;
+                    const isSelected = selectedIndex === currentIndex;
+
+                    return (
+                      <button
+                        key={p.slug}
+                        id={`search-item-${currentIndex}`}
+                        role="option"
+                        aria-selected={isSelected}
+                        type="button"
+                        onClick={() => handleSelectProject(p.slug)}
+                        onMouseEnter={() => setSelectedIndex(currentIndex)}
+                        className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left group ${
+                          isSelected
+                            ? "bg-[#e5e5e5] dark:bg-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1]"
+                            : "hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] text-[#0f0f0f] dark:text-[#f1f1f1]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Search size={15} className="text-[#606060] dark:text-[#aaaaaa] flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {p.name}
+                            </p>
+                            <p className="text-xs text-[#606060] dark:text-[#aaaaaa] truncate">
+                              {p.subtitle}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-[#ff0033] border border-red-500/20 flex-shrink-0">
-                        Project
-                      </span>
-                    </button>
-                  ))}
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-[#ff0033] border border-red-500/20 flex-shrink-0">
+                          Project
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
               {/* View full search results link */}
-              <div className="pt-2 mt-1 border-t border-[#f2f2f2] dark:border-[#2e2e2e] px-4">
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="w-full py-1.5 text-xs text-center font-medium text-[#065fd4] dark:text-[#3ea6ff] hover:underline"
-                >
-                  View all results for &quot;{query}&quot; →
-                </button>
-              </div>
+              {query.trim().length > 0 && (() => {
+                const currentIndex = itemCursor++;
+                const isSelected = selectedIndex === currentIndex;
+                return (
+                  <div className="pt-2 mt-1 border-t border-[#f2f2f2] dark:border-[#2e2e2e] px-2">
+                    <button
+                      id={`search-item-${currentIndex}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      type="button"
+                      onClick={() => handleSearch()}
+                      onMouseEnter={() => setSelectedIndex(currentIndex)}
+                      className={`w-full py-2 px-3 rounded-xl text-xs text-center font-medium transition-colors ${
+                        isSelected
+                          ? "bg-[#e5e5e5] dark:bg-[#383838] text-[#065fd4] dark:text-[#3ea6ff] font-semibold"
+                          : "text-[#065fd4] dark:text-[#3ea6ff] hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e]"
+                      }`}
+                    >
+                      View all results for &quot;{query}&quot; →
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
