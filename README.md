@@ -72,5 +72,5 @@ npm run start
 - **Education**: B.Tech in Information Technology, Bhagwan Parshuram Institute of Technology (GGSIPU), CGPA: 8.495/10.0
 - **Experience**: Technology Intern at ShortHills AI
 - **GitHub**: [github.com/sarthak102005](https://github.com/sarthak102005)
-- **LinkedIn**: [linkedin.com/in/sarthak-makkar-07085124b](https://www.linkedin.com/in/sarthak-makkar-07085124b/)
-- **Email**: [makkarsarthak10@gmail.com](mailto:makkarsarthak10@gmail.com)
+- **LinkedIn**: [linkedin.com/in/sarthakmakkar10](https://www.linkedin.com/in/sarthakmakkar10/)
+- **Email**: [sarthakmakkar60@gmail.com](mailto:sarthakmakkar60@gmail.com)
