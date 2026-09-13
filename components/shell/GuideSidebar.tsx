@@ -1,6 +1,5 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -37,15 +36,15 @@ const primaryNav = [
 
 const exploreNav = [
   { href: "/projects?filter=Backend", label: "Backend", icon: Cpu },
-  { href: "/projects?filter=Frontend", label: "Frontend", icon: Globe },
+  { href: "/projects?filter=Fullstack", label: "Fullstack", icon: Globe },
   { href: "/projects?filter=AI", label: "AI / GenAI", icon: Brain },
-  { href: "/skills", label: "Core CS", icon: BookOpen },
+  { href: "/projects?filter=Core+CS", label: "Core CS", icon: BookOpen },
   { href: "/projects", label: "All Projects", icon: FolderGit2 },
 ];
 
 const utilityNav = [
   {
-    href: "https://drive.google.com/file/d/1kpUDMh8ppQjTbE2V1UwD0wkuaXxXsFJz/view",
+    href: "/Sarthak_Resume.pdf",
     label: "Resume",
     icon: FileText,
     external: true,
@@ -70,18 +69,22 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname.startsWith(href.split("?")[0]);
+    return pathname.startsWith(href);
   };
 
-  const linkClass = (href: string, base = "") =>
-    `flex items-center gap-4 px-3 py-2.5 rounded-xl transition-colors cursor-pointer group select-none ${base} ${
+  const linkClass = (href: string) =>
+    `flex items-center gap-6 px-3 py-2.5 rounded-xl transition-colors text-sm group ${
       isActive(href)
-        ? "bg-[#f2f2f2] font-semibold text-[#0f0f0f]"
-        : "text-[#0f0f0f] hover:bg-[#f2f2f2]"
+        ? "bg-[#f2f2f2] dark:bg-[#272727] font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
+        : "text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
     }`;
 
   const iconClass = (href: string) =>
-    `flex-shrink-0 ${isActive(href) ? "text-[#0f0f0f]" : "text-[#606060] group-hover:text-[#0f0f0f]"}`;
+    `flex-shrink-0 ${
+      isActive(href)
+        ? "text-[#0f0f0f] dark:text-[#f1f1f1]"
+        : "text-[#606060] dark:text-[#aaaaaa] group-hover:text-[#0f0f0f] dark:group-hover:text-[#f1f1f1]"
+    }`;
 
   const NavSection = ({
     title,
@@ -92,11 +95,11 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
   }) => (
     <div className="py-2">
       {title && open && (
-        <p className="px-3 py-1 text-xs font-semibold text-[#909090] uppercase tracking-wider mb-1">
+        <p className="px-3 py-1 text-xs font-semibold text-[#909090] dark:text-[#717171] uppercase tracking-wider mb-1">
           {title}
         </p>
       )}
-      {!title && open && <div className="h-px bg-[#e5e5e5] mx-3 my-2" />}
+      {!title && open && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-3 my-2" />}
       {items.map(({ href, label, icon: Icon, ...rest }) => {
         const isExt = (rest as { external?: boolean }).external;
         return isExt ? (
@@ -105,6 +108,7 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
+            download={href.endsWith(".pdf") ? "Sarthak_Resume.pdf" : undefined}
             className={linkClass(href)}
             title={!open ? label : undefined}
             aria-label={label}
@@ -134,16 +138,18 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
       {/* Mobile overlay */}
       {open && onClose && (
         <div
-          className="fixed inset-0 bg-black/30 z-30 md:hidden"
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
+      {/* Desktop sidebar */}
       <nav
         className={`
           fixed left-0 top-[var(--topbar-height)] bottom-0 z-40
-          bg-white overflow-y-auto overflow-x-hidden
+          bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#272727]
+          overflow-y-auto overflow-x-hidden
           transition-[width] duration-200 ease-out
           sidebar hidden md:block
           ${open ? "w-[240px]" : "w-[72px]"}
@@ -158,11 +164,11 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
 
           {/* Footer info when expanded */}
           {open && (
-            <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5]">
-              <p className="text-[11px] text-[#909090] leading-relaxed">
+            <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5] dark:border-[#272727]">
+              <p className="text-[11px] text-[#909090] dark:text-[#717171] leading-relaxed">
                 © 2026 Sarthak Makkar
               </p>
-              <p className="text-[11px] text-[#909090]">Delhi, India</p>
+              <p className="text-[11px] text-[#909090] dark:text-[#717171]">Delhi, India</p>
             </div>
           )}
         </div>
@@ -172,34 +178,30 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
       <nav
         className={`
           fixed left-0 top-0 bottom-0 z-40 w-[240px]
-          bg-white overflow-y-auto overflow-x-hidden
+          bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#272727]
+          overflow-y-auto overflow-x-hidden
           transition-transform duration-200 ease-out
           md:hidden
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
         aria-label="Mobile navigation"
       >
-        {/* Logo area in mobile drawer */}
-        <div className="flex items-center gap-3 h-14 px-4 border-b border-[#e5e5e5]">
-          <div
-            className="flex items-center justify-center rounded-lg flex-shrink-0"
-            style={{ width: 28, height: 28, background: "#ff0033", borderRadius: "20%" }}
-          >
-            <svg viewBox="0 0 24 24" fill="white" width={14} height={14} style={{ marginLeft: 2 }}>
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </div>
-          <span className="font-bold text-[#0f0f0f] text-base">
-            Sarthak&apos;s Portfolio
+        <div className="p-4 border-b border-[#e5e5e5] dark:border-[#272727] flex items-center justify-between">
+          <span className="font-bold text-[#0f0f0f] dark:text-[#f1f1f1] text-base">
+            Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
           </span>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full text-[#606060] dark:text-[#aaaaaa] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
+            aria-label="Close drawer"
+          >
+            ✕
+          </button>
         </div>
         <div className="px-2 py-2">
           <NavSection items={primaryNav} />
           <NavSection title="Explore" items={exploreNav} />
           <NavSection items={utilityNav} />
-          <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5]">
-            <p className="text-[11px] text-[#909090]">© 2026 Sarthak Makkar · Delhi, India</p>
-          </div>
         </div>
       </nav>
     </>

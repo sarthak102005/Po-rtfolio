@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, GitBranch, FileText, Mail } from "lucide-react
 import { projects } from "@/data/projects";
 import { profile } from "@/data/profile";
 import ProjectCard from "@/components/feed/ProjectCard";
+import ProjectGallery from "@/components/project/ProjectGallery";
 import type { Metadata } from "next";
 
 interface Props {
@@ -29,16 +30,27 @@ export default async function ProjectWatchPage({ params }: Props) {
   const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
 
-  const related = projects.filter(
-    (p) => p.slug !== project.slug && (p.category === project.category || p.priority === project.priority)
-  ).slice(0, 3);
+  const related = projects
+    .filter(
+      (p) =>
+        p.slug !== project.slug &&
+        (p.category === project.category ||
+          p.priority === project.priority ||
+          p.categories.some((c) => project.categories.includes(c)))
+    )
+    .slice(0, 3);
 
-  const categoryLabel =
-    project.category === "ai"
-      ? "AI / GenAI"
-      : project.category === "fullstack"
-      ? "Full Stack"
-      : project.category.charAt(0).toUpperCase() + project.category.slice(1);
+  const categoryLabel = project.categories?.includes("fullstack")
+    ? "Fullstack"
+    : project.categories?.includes("backend")
+    ? "Backend"
+    : project.categories?.includes("ai")
+    ? "AI / GenAI"
+    : project.category === "ai"
+    ? "AI / GenAI"
+    : project.category === "fullstack"
+    ? "Fullstack"
+    : project.category.charAt(0).toUpperCase() + project.category.slice(1);
 
   return (
     <div className="content-wrap">
@@ -48,54 +60,23 @@ export default async function ProjectWatchPage({ params }: Props) {
           {/* Back nav */}
           <Link
             href="/projects"
-            className="inline-flex items-center gap-1.5 text-sm text-[#606060] hover:text-[#0f0f0f] transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-sm text-[#606060] dark:text-[#aaaaaa] hover:text-[#0f0f0f] dark:hover:text-[#f1f1f1] transition-colors mb-4"
           >
             <ArrowLeft size={16} />
             All Projects
           </Link>
 
-          {/* Hero thumbnail */}
-          <div
-            className="w-full rounded-2xl overflow-hidden mb-5"
-            style={{
-              aspectRatio: "16/9",
-              background: `linear-gradient(135deg, ${project.color} 0%, ${project.accentColor}33 100%)`,
-            }}
-            role="img"
-            aria-label={`${project.name} project visual`}
-          >
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-              <span style={{ fontSize: "clamp(48px, 8vw, 80px)" }} aria-hidden="true">
-                {project.icon}
-              </span>
-              <div
-                className="px-4 py-1.5 rounded-xl text-white font-mono font-bold text-center"
-                style={{ fontSize: "clamp(14px, 2vw, 22px)", background: "rgba(0,0,0,0.45)" }}
-              >
-                {project.name}
-              </div>
-              {project.metric && (
-                <div
-                  className="px-3 py-1 rounded-full text-white font-semibold"
-                  style={{
-                    fontSize: "clamp(11px, 1.5vw, 15px)",
-                    background: project.accentColor,
-                  }}
-                >
-                  {project.metric.label}: {project.metric.value}
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Large Project / Watch Page Gallery with Autoplay, Arrows, and Fullscreen Lightbox */}
+          <ProjectGallery project={project} />
 
           {/* Title */}
-          <h1 className="text-xl sm:text-2xl font-bold text-[#0f0f0f] leading-snug mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#0f0f0f] dark:text-[#f1f1f1] leading-snug mb-2">
             {project.name} — {project.subtitle}
           </h1>
 
           {/* Category + metric chips */}
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="px-2.5 py-1 rounded-full bg-[#f2f2f2] text-xs font-semibold text-[#606060]">
+            <span className="px-2.5 py-1 rounded-full bg-[#f2f2f2] dark:bg-[#272727] text-xs font-semibold text-[#606060] dark:text-[#aaaaaa]">
               {categoryLabel}
             </span>
             {project.metric && (
@@ -106,19 +87,19 @@ export default async function ProjectWatchPage({ params }: Props) {
                 {project.metric.value}
               </span>
             )}
-            <span className="px-2.5 py-1 rounded-full bg-[#f2f2f2] text-xs text-[#606060]">
+            <span className="px-2.5 py-1 rounded-full bg-[#f2f2f2] dark:bg-[#272727] text-xs text-[#606060] dark:text-[#aaaaaa]">
               {project.year}
             </span>
           </div>
 
           {/* Channel row */}
-          <div className="flex items-center gap-3 py-3 border-y border-[#e5e5e5] mb-4">
-            <div className="w-10 h-10 rounded-full bg-[#ff0033] flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+          <div className="flex items-center gap-3 py-3 border-y border-[#e5e5e5] dark:border-[#272727] mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#ff0033] flex items-center justify-center text-white font-bold text-base flex-shrink-0 select-none">
               S
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#0f0f0f]">{profile.name.full}</p>
-              <p className="text-xs text-[#606060]">{profile.handle}</p>
+              <p className="text-sm font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]">{profile.name.full}</p>
+              <p className="text-xs text-[#606060] dark:text-[#aaaaaa]">{profile.handle}</p>
             </div>
             <div className="ml-auto flex items-center gap-2 flex-wrap">
               {project.liveUrl && (
@@ -126,7 +107,7 @@ export default async function ProjectWatchPage({ params }: Props) {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0f0f0f] text-white text-sm font-semibold hover:bg-[#333] transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0f0f0f] dark:bg-[#f1f1f1] text-white dark:text-[#0f0f0f] text-sm font-semibold hover:opacity-90 transition-opacity"
                 >
                   <ExternalLink size={14} />
                   Live Demo
@@ -137,7 +118,7 @@ export default async function ProjectWatchPage({ params }: Props) {
                   href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#e5e5e5] text-[#0f0f0f] text-sm font-semibold hover:bg-[#f2f2f2] transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#e5e5e5] dark:border-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1] text-sm font-semibold hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
                 >
                   <GitBranch size={14} />
                   GitHub
@@ -148,28 +129,28 @@ export default async function ProjectWatchPage({ params }: Props) {
 
           {/* Description */}
           <section className="mb-6" aria-labelledby="project-overview">
-            <h2 id="project-overview" className="text-base font-semibold text-[#0f0f0f] mb-2">
+            <h2 id="project-overview" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-2">
               Overview
             </h2>
-            <p className="text-sm text-[#0f0f0f] leading-relaxed">{project.summary}</p>
+            <p className="text-sm text-[#0f0f0f] dark:text-[#e0e0e0] leading-relaxed">{project.summary}</p>
           </section>
 
           {/* Engineering decisions */}
           <section className="mb-6" aria-labelledby="project-proof">
-            <h2 id="project-proof" className="text-base font-semibold text-[#0f0f0f] mb-3">
+            <h2 id="project-proof" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-3">
               Engineering Decisions
             </h2>
             <ul className="space-y-3">
               {project.proofPoints.map((pt, i) => (
                 <li key={i} className="flex gap-3">
                   <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5"
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 select-none"
                     style={{ background: project.accentColor }}
                     aria-hidden="true"
                   >
                     {i + 1}
                   </div>
-                  <p className="text-sm text-[#0f0f0f] leading-relaxed">{pt}</p>
+                  <p className="text-sm text-[#0f0f0f] dark:text-[#e0e0e0] leading-relaxed">{pt}</p>
                 </li>
               ))}
             </ul>
@@ -177,15 +158,14 @@ export default async function ProjectWatchPage({ params }: Props) {
 
           {/* Architecture / Technical notes */}
           <section className="mb-6" aria-labelledby="project-arch">
-            <h2 id="project-arch" className="text-base font-semibold text-[#0f0f0f] mb-3">
+            <h2 id="project-arch" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-3">
               Architecture Notes
             </h2>
             <div
-              className="rounded-xl p-4 space-y-2"
-              style={{ background: `${project.color}12`, border: `1px solid ${project.accentColor}25` }}
+              className="rounded-xl p-4 space-y-2 bg-[#f9f9f9] dark:bg-[#181818] border border-[#e5e5e5] dark:border-[#282828]"
             >
               {project.architectureNotes.map((note, i) => (
-                <p key={i} className="text-sm text-[#0f0f0f] leading-relaxed flex gap-2">
+                <p key={i} className="text-sm text-[#0f0f0f] dark:text-[#e0e0e0] leading-relaxed flex gap-2">
                   <span style={{ color: project.accentColor }} aria-hidden="true">→</span>
                   {note}
                 </p>
@@ -195,14 +175,14 @@ export default async function ProjectWatchPage({ params }: Props) {
 
           {/* Tech stack */}
           <section className="mb-6" aria-labelledby="project-stack">
-            <h2 id="project-stack" className="text-base font-semibold text-[#0f0f0f] mb-3">
+            <h2 id="project-stack" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-3">
               Technology Stack
             </h2>
             <div className="flex flex-wrap gap-2">
               {project.stack.map((tech) => (
                 <span
                   key={tech}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium border border-[#e5e5e5] bg-white text-[#0f0f0f] hover:bg-[#f2f2f2] transition-colors"
+                  className="px-3 py-1.5 rounded-full text-sm font-medium border border-[#e5e5e5] dark:border-[#383838] bg-white dark:bg-[#212121] text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
                 >
                   {tech}
                 </span>
@@ -211,11 +191,12 @@ export default async function ProjectWatchPage({ params }: Props) {
           </section>
 
           {/* Action row: hire CTA */}
-          <div className="flex flex-wrap items-center gap-3 py-4 border-t border-[#e5e5e5]">
+          <div className="flex flex-wrap items-center gap-3 py-4 border-t border-[#e5e5e5] dark:border-[#272727]">
             <a
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
+              download="Sarthak_Resume.pdf"
               className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ff0033] text-white text-sm font-semibold hover:bg-[#cc0000] transition-colors"
             >
               <FileText size={14} />
@@ -223,7 +204,7 @@ export default async function ProjectWatchPage({ params }: Props) {
             </a>
             <a
               href={`mailto:${profile.email}`}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#e5e5e5] text-[#0f0f0f] text-sm font-semibold hover:bg-[#f2f2f2] transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#e5e5e5] dark:border-[#383838] text-[#0f0f0f] dark:text-[#f1f1f1] text-sm font-semibold hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
             >
               <Mail size={14} />
               Hire me
@@ -236,7 +217,7 @@ export default async function ProjectWatchPage({ params }: Props) {
           className="lg:w-[360px] xl:w-[400px] flex-shrink-0"
           aria-label="Related projects"
         >
-          <h2 className="text-base font-semibold text-[#0f0f0f] mb-4">Up next</h2>
+          <h2 className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-4">Up next</h2>
           <div className="space-y-4">
             {related.map((rp) => (
               <ProjectCard key={rp.slug} project={rp} />
@@ -244,11 +225,11 @@ export default async function ProjectWatchPage({ params }: Props) {
           </div>
 
           {related.length === 0 && (
-            <div className="p-4 rounded-xl bg-[#f9f9f9] text-center">
-              <p className="text-sm text-[#606060]">No related projects</p>
+            <div className="p-4 rounded-xl bg-[#f9f9f9] dark:bg-[#181818] border border-[#e5e5e5] dark:border-[#282828] text-center">
+              <p className="text-sm text-[#606060] dark:text-[#aaaaaa]">No related projects</p>
               <Link
                 href="/projects"
-                className="text-sm text-[#065fd4] hover:underline mt-1 block"
+                className="text-sm text-[#065fd4] dark:text-[#3ea6ff] hover:underline mt-1 block"
               >
                 View all projects →
               </Link>

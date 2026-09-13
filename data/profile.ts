@@ -36,5 +36,5 @@ export const profile = {
       detail: "Top 15",
     },
   ],
-  resumeUrl: "https://drive.google.com/file/d/1kpUDMh8ppQjTbE2V1UwD0wkuaXxXsFJz/view",
+  resumeUrl: "/Sarthak_Resume.pdf",
 };

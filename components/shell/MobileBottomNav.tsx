@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,7 +19,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e5e5e5] flex md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#0f0f0f] border-t border-[#e5e5e5] dark:border-[#272727] flex md:hidden transition-colors"
       style={{ height: 56 }}
       aria-label="Mobile bottom navigation"
     >
@@ -34,14 +34,18 @@ export default function MobileBottomNav() {
           <Icon
             size={22}
             strokeWidth={isActive(href) ? 2.2 : 1.6}
-            className={isActive(href) ? "text-[#0f0f0f]" : "text-[#606060]"}
+            className={
+              isActive(href)
+                ? "text-[#0f0f0f] dark:text-[#f1f1f1]"
+                : "text-[#606060] dark:text-[#aaaaaa]"
+            }
           />
           <span
-            className="text-[10px]"
-            style={{
-              color: isActive(href) ? "#0f0f0f" : "#606060",
-              fontWeight: isActive(href) ? 600 : 400,
-            }}
+            className={`text-[10px] ${
+              isActive(href)
+                ? "font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
+                : "text-[#606060] dark:text-[#aaaaaa]"
+            }`}
           >
             {label}
           </span>

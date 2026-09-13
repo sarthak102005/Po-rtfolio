@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -21,17 +21,17 @@ export default function TopicChips({ selected, onSelect }: TopicChipsProps) {
 
   return (
     <div
-      className="sticky z-20 bg-white border-b border-[#e5e5e5]"
+      className="sticky z-20 bg-white dark:bg-[#0f0f0f] border-b border-[#e5e5e5] dark:border-[#272727] transition-colors"
       style={{ top: "var(--topbar-height)" }}
     >
       <div className="relative flex items-center max-w-[2560px] mx-auto">
         {/* Left fade + arrow */}
         <button
           onClick={scrollLeft}
-          className="hidden sm:flex absolute left-0 z-10 items-center justify-center w-10 h-full bg-gradient-to-r from-white to-transparent flex-shrink-0"
+          className="hidden sm:flex absolute left-0 z-10 items-center justify-center w-10 h-full bg-gradient-to-r from-white dark:from-[#0f0f0f] to-transparent flex-shrink-0"
           aria-label="Scroll chips left"
         >
-          <ChevronLeft size={18} className="text-[#606060]" />
+          <ChevronLeft size={18} className="text-[#606060] dark:text-[#aaaaaa]" />
         </button>
 
         {/* Scrollable chip row */}
@@ -59,10 +59,10 @@ export default function TopicChips({ selected, onSelect }: TopicChipsProps) {
         {/* Right fade + arrow */}
         <button
           onClick={scrollRight}
-          className="hidden sm:flex absolute right-0 z-10 items-center justify-center w-10 h-full bg-gradient-to-l from-white to-transparent flex-shrink-0"
+          className="hidden sm:flex absolute right-0 z-10 items-center justify-center w-10 h-full bg-gradient-to-l from-white dark:from-[#0f0f0f] to-transparent flex-shrink-0"
           aria-label="Scroll chips right"
         >
-          <ChevronRight size={18} className="text-[#606060]" />
+          <ChevronRight size={18} className="text-[#606060] dark:text-[#aaaaaa]" />
         </button>
       </div>
     </div>

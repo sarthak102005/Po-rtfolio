@@ -7,6 +7,9 @@ export type Project = {
   subtitle: string;
   priority: ProjectPriority;
   category: ProjectCategory;
+  categories: string[];
+  gallery: string[];
+  thumbnail?: string;
   liveUrl?: string;
   githubUrl?: string;
   stack: string[];
@@ -28,7 +31,17 @@ export const projects: Project[] = [
     subtitle: "Email Job Scheduler",
     priority: "primary",
     category: "backend",
+    categories: ["backend", "systems"],
+    gallery: [
+      "/projects/reachinbox/ss1.png",
+      "/projects/reachinbox/ss2.png",
+      "/projects/reachinbox/ss3.png",
+      "/projects/reachinbox/ss4.png",
+      "/projects/reachinbox/ss5.png",
+    ],
+    thumbnail: "/projects/reachinbox/ss1.png",
     liveUrl: "https://reach-inbox-topaz.vercel.app",
+    githubUrl: "https://github.com/sarthak102005/ReachInbox-Backend",
     stack: [
       "Node.js",
       "TypeScript",
@@ -71,7 +84,16 @@ export const projects: Project[] = [
     subtitle: "Earned Wage Access Platform",
     priority: "primary",
     category: "fullstack",
+    categories: ["fullstack", "backend", "systems"],
+    gallery: [
+      "/projects/earnease/ss1.png",
+      "/projects/earnease/ss2.png",
+      "/projects/earnease/ss3.png",
+      "/projects/earnease/ss4.png",
+    ],
+    thumbnail: "/projects/earnease/ss1.png",
     liveUrl: "https://earnease-seven.vercel.app",
+    githubUrl: "https://github.com/sarthak102005/EarnEase",
     stack: ["FastAPI", "PostgreSQL", "React", "Framer Motion"],
     summary:
       "Full-stack earned wage access system with a two-tier eligibility engine, six-state request lifecycle, and append-only audit logging.",
@@ -91,7 +113,7 @@ export const projects: Project[] = [
       "Wage-accrual engine prevents duplicate advances within the same pay cycle",
       "Calendar-day rate limiting and bcrypt password hashing hardened against long passphrase inputs",
     ],
-    chips: ["Full Stack", "Backend", "Systems"],
+    chips: ["Fullstack", "Backend", "Systems"],
     color: "#0f2027",
     accentColor: "#43b89c",
     icon: "💰",
@@ -103,7 +125,19 @@ export const projects: Project[] = [
     subtitle: "Multi-Agent LLM-Assisted Extraction",
     priority: "featured",
     category: "ai",
+    categories: ["ai", "systems"],
+    gallery: [
+      "/projects/quantum-scraper/ss1.png",
+      "/projects/quantum-scraper/ss2.png",
+      "/projects/quantum-scraper/ss3.png",
+      "/projects/quantum-scraper/ss4.png",
+      "/projects/quantum-scraper/ss5.png",
+      "/projects/quantum-scraper/ss6.png",
+      "/projects/quantum-scraper/ss7.png",
+    ],
+    thumbnail: "/projects/quantum-scraper/ss1.png",
     liveUrl: "https://quantum-scraper-beryl.vercel.app",
+    githubUrl: "https://github.com/sarthak102005/quantum-scraper",
     stack: [
       "Python",
       "AsyncIO",
@@ -133,7 +167,7 @@ export const projects: Project[] = [
       "Enterprise manufacturer evaluation across diverse page structures and schemas",
       "Built and delivered during Technology Internship at ShortHills AI (Jun–Aug 2026)",
     ],
-    chips: ["AI", "GenAI", "RAG", "Agents"],
+    chips: ["AI / GenAI", "GenAI", "RAG", "Agents"],
     color: "#1a0533",
     accentColor: "#a855f7",
     icon: "🤖",
@@ -145,6 +179,17 @@ export const projects: Project[] = [
     subtitle: "RAG-Based Wikipedia Chatbot",
     priority: "featured",
     category: "ai",
+    categories: ["ai"],
+    gallery: [
+      "/projects/ask-wiki/ss1.png",
+      "/projects/ask-wiki/ss2.png",
+      "/projects/ask-wiki/ss3.png",
+      "/projects/ask-wiki/ss4.png",
+      "/projects/ask-wiki/ss5.png",
+      "/projects/ask-wiki/ss6.png",
+    ],
+    thumbnail: "/projects/ask-wiki/ss1.png",
+    githubUrl: "https://github.com/sarthak102005/Ask-Wiki",
     stack: [
       "Python",
       "RAG",
@@ -173,7 +218,7 @@ export const projects: Project[] = [
       "DeepEval provides additional G-Eval and hallucination detection metrics",
       "7,500 test query evaluation set for systematic RAG performance benchmarking",
     ],
-    chips: ["AI", "RAG", "GenAI"],
+    chips: ["AI / GenAI", "RAG", "GenAI"],
     color: "#002244",
     accentColor: "#3b82f6",
     icon: "📚",
@@ -185,6 +230,16 @@ export const projects: Project[] = [
     subtitle: "URL Shortener & Analytics",
     priority: "secondary",
     category: "backend",
+    categories: ["backend", "systems"],
+    gallery: [
+      "/projects/briefly/ss1.png",
+      "/projects/briefly/ss2.png",
+      "/projects/briefly/ss3.png",
+      "/projects/briefly/ss4.png",
+      "/projects/briefly/ss5.png",
+    ],
+    thumbnail: "/projects/briefly/ss1.png",
+    githubUrl: "https://github.com/sarthak102005/Brief.ly",
     stack: ["FastAPI", "PostgreSQL", "Redis", "React", "Docker Compose"],
     summary:
       "High-performance URL shortener with Redis cache-aside resolution, per-user/IP rate limiting, and real-time click analytics dashboard.",
@@ -213,27 +268,43 @@ export const projects: Project[] = [
 
 export const topicChips = [
   "All",
-  "AI",
   "Backend",
-  "Full Stack",
+  "Fullstack",
+  "AI / GenAI",
+  "Core CS",
   "Systems",
-  "GenAI",
   "RAG",
   "APIs",
   "Distributed Systems",
-  "Frontend",
-  "Projects",
+  "All Projects",
 ];
 
 export function filterProjects(allProjects: Project[], chip: string): Project[] {
-  if (chip === "All") return allProjects;
-  const lower = chip.toLowerCase();
+  if (!chip || chip === "All" || chip === "All Projects") return allProjects;
+  const lower = chip.toLowerCase().replace(/[\s\-_/]/g, "");
+
+  if (lower === "fullstack") {
+    return allProjects.filter((p) => p.categories.includes("fullstack"));
+  }
+  if (lower === "backend") {
+    return allProjects.filter((p) => p.categories.includes("backend"));
+  }
+  if (lower === "ai" || lower === "genai" || lower === "aigenai") {
+    return allProjects.filter((p) => p.categories.includes("ai"));
+  }
+  if (lower === "corecs" || lower === "cs") {
+    return allProjects.filter((p) => p.categories.includes("core-cs") || p.categories.includes("corecs"));
+  }
+  if (lower === "systems") {
+    return allProjects.filter((p) => p.categories.includes("systems") || p.chips.some(c => c.toLowerCase().includes("systems")));
+  }
+
   return allProjects.filter(
     (p) =>
-      p.chips.some((c) => c.toLowerCase() === lower) ||
-      p.category.toLowerCase().includes(lower) ||
-      p.stack.some((s) => s.toLowerCase().includes(lower)) ||
-      p.subtitle.toLowerCase().includes(lower) ||
-      p.summary.toLowerCase().includes(lower)
+      p.categories.some((c) => c.toLowerCase().includes(lower)) ||
+      p.chips.some((c) => c.toLowerCase().replace(/[\s\-_/]/g, "").includes(lower)) ||
+      p.stack.some((s) => s.toLowerCase().replace(/[\s\-_/]/g, "").includes(lower)) ||
+      p.subtitle.toLowerCase().includes(chip.toLowerCase()) ||
+      p.summary.toLowerCase().includes(chip.toLowerCase())
   );
 }

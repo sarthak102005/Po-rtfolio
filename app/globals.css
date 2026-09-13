@@ -12,9 +12,28 @@
   --yt-red-dark: #cc0000;
   --yt-hover: #f2f2f2;
   --yt-active-bg: #e5e5e5;
+  --yt-card-bg: #ffffff;
+  --yt-card-border: #e5e5e5;
+  --yt-surface-elevated: #ffffff;
   --sidebar-expanded: 240px;
   --sidebar-collapsed: 72px;
   --topbar-height: 56px;
+}
+
+html.dark {
+  --yt-white: #0f0f0f;
+  --yt-bg: #0f0f0f;
+  --yt-bg2: #212121;
+  --yt-text: #f1f1f1;
+  --yt-muted: #aaaaaa;
+  --yt-border: #272727;
+  --yt-red: #ff0033;
+  --yt-red-dark: #cc0000;
+  --yt-hover: #272727;
+  --yt-active-bg: #383838;
+  --yt-card-bg: #181818;
+  --yt-card-border: #282828;
+  --yt-surface-elevated: #212121;
 }
 
 * {
@@ -33,6 +52,12 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark body {
+  background-color: #0f0f0f;
+  color: #f1f1f1;
 }
 
 /* Scrollbar styling */
@@ -49,6 +74,13 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #909090;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #383838;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4f4f4f;
 }
 
 /* Horizontal chip scrollbar — hide it */
@@ -105,7 +137,7 @@ body {
 
 /* Sidebar transition */
 .sidebar {
-  transition: width 200ms ease, transform 200ms ease;
+  transition: width 200ms ease, transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
   will-change: width;
 }
 
@@ -177,7 +209,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 150ms ease;
+  transition: background 150ms ease, color 150ms ease;
   user-select: none;
   border: none;
   outline: none;
@@ -188,11 +220,25 @@ body {
   color: #ffffff;
 }
 
+html.dark .chip-active {
+  background: #f1f1f1;
+  color: #0f0f0f;
+}
+
 .chip-inactive {
   background: #f2f2f2;
   color: #0f0f0f;
 }
 
+html.dark .chip-inactive {
+  background: #272727;
+  color: #f1f1f1;
+}
+
 .chip-inactive:hover {
   background: #e5e5e5;
+}
+
+html.dark .chip-inactive:hover {
+  background: #383838;
 }

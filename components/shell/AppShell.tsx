@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import TopBar from "./TopBar";
@@ -63,7 +63,7 @@ export default function AppShell({ children }: AppShellProps) {
 
       {/* App shell (rendered behind splash, fades in after) */}
       <div
-        className="min-h-screen bg-white"
+        className="min-h-screen bg-white dark:bg-[#0f0f0f] text-[#0f0f0f] dark:text-[#f1f1f1] transition-colors duration-200"
         style={{ opacity: splashDone ? 1 : 0, transition: "opacity 0.3s ease" }}
       >
         <TopBar onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />

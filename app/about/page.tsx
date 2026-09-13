@@ -1,9 +1,7 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText, GitBranch, Link2, Mail, MapPin, GraduationCap, Trophy } from "lucide-react";
 import { profile } from "@/data/profile";
-import { experience } from "@/data/experience";
-import { skillGroups } from "@/data/skills";
 import ProjectCard from "@/components/feed/ProjectCard";
 import { projects } from "@/data/projects";
 
@@ -43,7 +41,7 @@ export default function AboutPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-8 sm:-mt-10 mb-5">
           {/* Avatar */}
           <div
-            className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[#ff0033] border-4 border-white flex items-center justify-center text-white font-bold text-3xl sm:text-4xl flex-shrink-0 z-10"
+            className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[#ff0033] border-4 border-white dark:border-[#0f0f0f] flex items-center justify-center text-white font-bold text-3xl sm:text-4xl flex-shrink-0 z-10 select-none shadow-md"
             aria-hidden="true"
           >
             S
@@ -51,11 +49,11 @@ export default function AboutPage() {
 
           {/* Identity */}
           <div className="flex-1 min-w-0 pt-2 sm:pt-0 sm:pb-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#0f0f0f] leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#0f0f0f] dark:text-[#f1f1f1] leading-tight">
               {profile.name.full}
             </h1>
-            <p className="text-sm text-[#606060] mt-0.5">{profile.handle}</p>
-            <p className="text-sm text-[#606060] mt-0.5">{profile.tagline}</p>
+            <p className="text-sm text-[#606060] dark:text-[#aaaaaa] mt-0.5">{profile.handle}</p>
+            <p className="text-sm text-[#606060] dark:text-[#aaaaaa] mt-0.5">{profile.tagline}</p>
           </div>
 
           {/* CTA */}
@@ -64,7 +62,8 @@ export default function AboutPage() {
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0f0f0f] text-white text-sm font-semibold hover:bg-[#333] transition-colors"
+              download="Sarthak_Resume.pdf"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0f0f0f] dark:bg-[#f1f1f1] text-white dark:text-[#0f0f0f] text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <FileText size={14} />
               View Resume
@@ -74,7 +73,7 @@ export default function AboutPage() {
 
         {/* Tabs */}
         <nav
-          className="flex items-center gap-1 border-b border-[#e5e5e5] overflow-x-auto chips-scroll"
+          className="flex items-center gap-1 border-b border-[#e5e5e5] dark:border-[#272727] overflow-x-auto chips-scroll"
           aria-label="Channel tabs"
           role="tablist"
         >
@@ -83,8 +82,8 @@ export default function AboutPage() {
               key={tab}
               className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 tab === "Home"
-                  ? "border-[#0f0f0f] text-[#0f0f0f]"
-                  : "border-transparent text-[#606060] hover:text-[#0f0f0f]"
+                  ? "border-[#0f0f0f] dark:border-[#f1f1f1] text-[#0f0f0f] dark:text-[#f1f1f1]"
+                  : "border-transparent text-[#606060] dark:text-[#aaaaaa] hover:text-[#0f0f0f] dark:hover:text-[#f1f1f1]"
               }`}
               role="tab"
               aria-selected={tab === "Home"}
@@ -100,10 +99,10 @@ export default function AboutPage() {
         {/* Featured projects shelf */}
         <section aria-labelledby="channel-featured">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="channel-featured" className="text-base font-semibold text-[#0f0f0f]">
+            <h2 id="channel-featured" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]">
               Featured Projects
             </h2>
-            <Link href="/projects" className="text-sm text-[#065fd4] hover:underline">
+            <Link href="/projects" className="text-sm text-[#065fd4] dark:text-[#3ea6ff] hover:underline">
               See all
             </Link>
           </div>
@@ -116,33 +115,33 @@ export default function AboutPage() {
 
         {/* About / Bio */}
         <section aria-labelledby="channel-about">
-          <h2 id="channel-about" className="text-base font-semibold text-[#0f0f0f] mb-4">
+          <h2 id="channel-about" className="text-base font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] mb-4">
             About
           </h2>
-          <div className="rounded-xl border border-[#e5e5e5] p-5 sm:p-6 space-y-4">
-            <p className="text-sm text-[#0f0f0f] leading-relaxed">
+          <div className="rounded-xl border border-[#e5e5e5] dark:border-[#282828] bg-white dark:bg-[#181818] p-5 sm:p-6 space-y-4">
+            <p className="text-sm text-[#0f0f0f] dark:text-[#e0e0e0] leading-relaxed">
               {profile.valueProp}
             </p>
-            <p className="text-sm text-[#606060] leading-relaxed">
+            <p className="text-sm text-[#606060] dark:text-[#aaaaaa] leading-relaxed">
               I&apos;m a final-year B.Tech IT student at{" "}
-              <strong className="text-[#0f0f0f]">{profile.education.institution}</strong> (
+              <strong className="text-[#0f0f0f] dark:text-[#f1f1f1]">{profile.education.institution}</strong> (
               {profile.education.period}), graduating{" "}
-              <strong className="text-[#0f0f0f]">{profile.education.graduatingDate}</strong> with a
-              CGPA of <strong className="text-[#0f0f0f]">{profile.education.cgpa}/{profile.education.cgpaOutOf}</strong>.
-              I specialize in building production-grade backend systems, full-stack applications, and AI/GenAI pipelines.
+              <strong className="text-[#0f0f0f] dark:text-[#f1f1f1]">{profile.education.graduatingDate}</strong> with a
+              CGPA of <strong className="text-[#0f0f0f] dark:text-[#f1f1f1]">{profile.education.cgpa}/{profile.education.cgpaOutOf}</strong>.
+              I specialize in building production-grade backend systems, fullstack applications, and AI/GenAI pipelines.
             </p>
 
             {/* Education block */}
-            <div className="flex flex-wrap gap-4 pt-2 border-t border-[#f2f2f2]">
-              <div className="flex items-center gap-2 text-sm text-[#606060]">
+            <div className="flex flex-wrap gap-4 pt-2 border-t border-[#f2f2f2] dark:border-[#282828]">
+              <div className="flex items-center gap-2 text-sm text-[#606060] dark:text-[#aaaaaa]">
                 <GraduationCap size={15} className="text-[#ff0033]" />
                 <span>{profile.education.degree} · {profile.education.shortInstitution}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-[#606060]">
+              <div className="flex items-center gap-2 text-sm text-[#606060] dark:text-[#aaaaaa]">
                 <MapPin size={15} className="text-[#ff0033]" />
                 <span>{profile.location}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-[#606060]">
+              <div className="flex items-center gap-2 text-sm text-[#606060] dark:text-[#aaaaaa]">
                 <Trophy size={15} className="text-[#ff0033]" />
                 <span>Hackhazards &apos;24 — Top 15</span>
               </div>
@@ -156,18 +155,18 @@ export default function AboutPage() {
                 { label: "Class 10", value: profile.education.board10.split("—")[1].trim() },
                 { label: "Graduating", value: profile.education.graduatingDate },
               ].map(({ label, value }) => (
-                <div key={label} className="px-3 py-2 rounded-lg bg-[#f9f9f9] text-center min-w-[80px]">
-                  <p className="text-xs text-[#606060]">{label}</p>
-                  <p className="text-sm font-semibold text-[#0f0f0f]">{value}</p>
+                <div key={label} className="px-3 py-2 rounded-lg bg-[#f9f9f9] dark:bg-[#212121] text-center min-w-[80px]">
+                  <p className="text-xs text-[#606060] dark:text-[#aaaaaa]">{label}</p>
+                  <p className="text-sm font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]">{value}</p>
                 </div>
               ))}
             </div>
 
             {/* Social links */}
-            <div className="flex flex-wrap gap-3 pt-2 border-t border-[#f2f2f2]">
+            <div className="flex flex-wrap gap-3 pt-2 border-t border-[#f2f2f2] dark:border-[#282828]">
               <a
                 href={`mailto:${profile.email}`}
-                className="flex items-center gap-1.5 text-sm text-[#065fd4] hover:underline"
+                className="flex items-center gap-1.5 text-sm text-[#065fd4] dark:text-[#3ea6ff] hover:underline"
               >
                 <Mail size={14} /> {profile.email}
               </a>
@@ -175,7 +174,7 @@ export default function AboutPage() {
                 href={profile.linkedin.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-[#065fd4] hover:underline"
+                className="flex items-center gap-1.5 text-sm text-[#065fd4] dark:text-[#3ea6ff] hover:underline"
               >
                 <Link2 size={14} /> LinkedIn
               </a>
@@ -183,7 +182,7 @@ export default function AboutPage() {
                 href={profile.github.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-[#065fd4] hover:underline"
+                className="flex items-center gap-1.5 text-sm text-[#065fd4] dark:text-[#3ea6ff] hover:underline"
               >
                 <GitBranch size={14} /> GitHub
               </a>

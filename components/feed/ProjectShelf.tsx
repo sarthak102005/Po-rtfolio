@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -26,14 +26,14 @@ export default function ProjectShelf({
       <div className="flex items-center justify-between mb-4">
         <h2
           id={`shelf-${title.replace(/\s+/g, "-").toLowerCase()}`}
-          className="text-lg font-semibold text-[#0f0f0f]"
+          className="text-lg font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
         >
           {title}
         </h2>
         {seeAllHref && (
           <Link
             href={seeAllHref}
-            className="flex items-center gap-1 text-sm font-medium text-[#065fd4] hover:text-[#0f0f0f] transition-colors"
+            className="flex items-center gap-1 text-sm font-medium text-[#065fd4] dark:text-[#3ea6ff] hover:text-[#0f0f0f] dark:hover:text-[#f1f1f1] transition-colors"
             aria-label={`${seeAllLabel} in ${title}`}
           >
             {seeAllLabel}
