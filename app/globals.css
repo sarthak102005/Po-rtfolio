@@ -1,39 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --yt-white: #ffffff;
-  --yt-bg: #f9f9f9;
-  --yt-bg2: #f2f2f2;
-  --yt-text: #0f0f0f;
-  --yt-muted: #606060;
+  --yt-bg-page: #ffffff;
+  --yt-bg-header: #ffffff;
+  --yt-bg-sidebar: #ffffff;
+  --yt-bg-surface: #ffffff;
+  --yt-bg-elevated: #f9f9f9;
+  --yt-bg-hover: #f2f2f2;
+  --yt-text-primary: #0f0f0f;
+  --yt-text-secondary: #606060;
   --yt-border: #e5e5e5;
+  --yt-border-subtle: #f2f2f2;
   --yt-red: #ff0033;
   --yt-red-dark: #cc0000;
-  --yt-hover: #f2f2f2;
-  --yt-active-bg: #e5e5e5;
-  --yt-card-bg: #ffffff;
-  --yt-card-border: #e5e5e5;
-  --yt-surface-elevated: #ffffff;
+  --yt-chip-bg: #f2f2f2;
+  --yt-chip-text: #0f0f0f;
+  --yt-chip-hover: #e5e5e5;
+  --yt-chip-active-bg: #0f0f0f;
+  --yt-chip-active-text: #ffffff;
   --sidebar-expanded: 240px;
   --sidebar-collapsed: 72px;
   --topbar-height: 56px;
 }
 
-html.dark {
-  --yt-white: #0f0f0f;
-  --yt-bg: #0f0f0f;
-  --yt-bg2: #212121;
-  --yt-text: #f1f1f1;
-  --yt-muted: #aaaaaa;
+html.dark, .dark {
+  --yt-bg-page: #0f0f0f;
+  --yt-bg-header: #0f0f0f;
+  --yt-bg-sidebar: #0f0f0f;
+  --yt-bg-surface: #181818;
+  --yt-bg-elevated: #212121;
+  --yt-bg-hover: #272727;
+  --yt-text-primary: #f1f1f1;
+  --yt-text-secondary: #aaaaaa;
   --yt-border: #272727;
-  --yt-red: #ff0033;
-  --yt-red-dark: #cc0000;
-  --yt-hover: #272727;
-  --yt-active-bg: #383838;
-  --yt-card-bg: #181818;
-  --yt-card-border: #282828;
-  --yt-surface-elevated: #212121;
+  --yt-border-subtle: #202020;
+  --yt-chip-bg: #272727;
+  --yt-chip-text: #f1f1f1;
+  --yt-chip-hover: #383838;
+  --yt-chip-active-bg: #f1f1f1;
+  --yt-chip-active-text: #0f0f0f;
 }
 
 * {
@@ -44,20 +52,79 @@ html {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
+  background-color: #ffffff;
+}
+
+html.dark {
+  background-color: #0f0f0f;
 }
 
 body {
-  background-color: var(--yt-white);
-  color: var(--yt-text);
+  background-color: var(--yt-bg-page);
+  color: var(--yt-text-primary);
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
-html.dark body {
-  background-color: #0f0f0f;
-  color: #f1f1f1;
+/* Global YouTube Dark Mode Enforcements */
+html.dark body,
+.dark body,
+html.dark main,
+.dark main,
+html.dark #main-content,
+.dark #main-content {
+  background-color: #0f0f0f !important;
+  color: #f1f1f1 !important;
+}
+
+html.dark header, .dark header {
+  background-color: #0f0f0f !important;
+  border-color: #272727 !important;
+}
+
+html.dark nav, .dark nav {
+  background-color: #0f0f0f !important;
+  border-color: #272727 !important;
+}
+
+/* Ensure surfaces and cards adapt properly */
+html.dark .bg-white {
+  background-color: #181818 !important;
+}
+
+html.dark .border-\[\#e5e5e5\] {
+  border-color: #272727 !important;
+}
+
+html.dark .text-\[\#0f0f0f\] {
+  color: #f1f1f1 !important;
+}
+
+html.dark .text-\[\#606060\] {
+  color: #aaaaaa !important;
+}
+
+html.dark .bg-\[\#f2f2f2\] {
+  background-color: #272727 !important;
+}
+
+html.dark .bg-\[\#f9f9f9\] {
+  background-color: #1a1a1a !important;
+}
+
+html.dark .hover\:bg-\[\#f2f2f2\]:hover {
+  background-color: #272727 !important;
+}
+
+html.dark .hover\:bg-\[\#e5e5e5\]:hover {
+  background-color: #383838 !important;
+}
+
+/* Project screenshots — Never darken or tint */
+img {
+  filter: none !important;
 }
 
 /* Scrollbar styling */
@@ -131,27 +198,13 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   width: 100%;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--yt-bg2);
   position: relative;
 }
 
-/* Sidebar transition */
+/* Sidebar smooth transition */
 .sidebar {
-  transition: width 200ms ease, transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
-  will-change: width;
-}
-
-/* App layout */
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-  padding-top: var(--topbar-height);
-}
-
-.main-content {
-  flex: 1;
-  min-width: 0;
-  overflow-x: hidden;
+  transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease;
+  will-change: width, box-shadow;
 }
 
 /* Grid utilities */
@@ -220,9 +273,9 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   color: #ffffff;
 }
 
-html.dark .chip-active {
-  background: #f1f1f1;
-  color: #0f0f0f;
+html.dark .chip-active, .dark .chip-active {
+  background: #f1f1f1 !important;
+  color: #0f0f0f !important;
 }
 
 .chip-inactive {
@@ -230,15 +283,15 @@ html.dark .chip-active {
   color: #0f0f0f;
 }
 
-html.dark .chip-inactive {
-  background: #272727;
-  color: #f1f1f1;
+html.dark .chip-inactive, .dark .chip-inactive {
+  background: #272727 !important;
+  color: #f1f1f1 !important;
 }
 
 .chip-inactive:hover {
   background: #e5e5e5;
 }
 
-html.dark .chip-inactive:hover {
-  background: #383838;
+html.dark .chip-inactive:hover, .dark .chip-inactive:hover {
+  background: #383838 !important;
 }

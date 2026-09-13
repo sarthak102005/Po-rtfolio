@@ -19,7 +19,18 @@ const ThemeContext = createContext<ThemeContextType>({
 const THEME_KEY = "yt-portfolio-theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(THEME_KEY) as Theme | null;
+        if (saved === "dark" || saved === "light") return saved;
+        if (document.documentElement.classList.contains("dark")) return "dark";
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+      } catch {}
+    }
+    return "light";
+  });
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -43,9 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           document.documentElement.classList.remove("dark");
         }
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
   }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
@@ -76,7 +85,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme: mounted ? theme : "light", toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

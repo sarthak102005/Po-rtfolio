@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -66,14 +67,59 @@ const utilityNav = [
 
 export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
   const pathname = usePathname();
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear hover state when pinned open state changes
+  useEffect(() => {
+    if (open) {
+      setIsHovered(false);
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    }
+  }, [open]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    // Only expand on hover if currently collapsed on desktop
+    if (!open) {
+      setIsHovered(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+    // 150ms hysteresis delay before collapsing to prevent flickering
+    hoverTimerRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 150);
+  };
+
+  // Effective expanded state (either explicitly open or hovered on desktop)
+  const isExpanded = open || isHovered;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
+    if (href.startsWith("/projects?filter=")) {
+      // Handled via URL params if on projects page
+      return false;
+    }
     return pathname.startsWith(href);
   };
 
   const linkClass = (href: string) =>
-    `flex items-center gap-6 px-3 py-2.5 rounded-xl transition-colors text-sm group ${
+    `flex items-center gap-5 px-3 py-2.5 rounded-xl transition-all duration-150 text-sm group select-none ${
       isActive(href)
         ? "bg-[#f2f2f2] dark:bg-[#272727] font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
         : "text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
@@ -89,17 +135,20 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
   const NavSection = ({
     title,
     items,
+    expanded,
   }: {
     title?: string;
     items: typeof primaryNav;
+    expanded: boolean;
   }) => (
     <div className="py-2">
-      {title && open && (
-        <p className="px-3 py-1 text-xs font-semibold text-[#909090] dark:text-[#717171] uppercase tracking-wider mb-1">
+      {title && expanded && (
+        <p className="px-3 py-1 text-xs font-semibold text-[#909090] dark:text-[#717171] uppercase tracking-wider mb-1 transition-opacity duration-200">
           {title}
         </p>
       )}
-      {!title && open && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-3 my-2" />}
+      {!title && expanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-3 my-2" />}
+      {!expanded && <div className="h-px bg-[#e5e5e5] dark:bg-[#272727] mx-2 my-2" />}
       {items.map(({ href, label, icon: Icon, ...rest }) => {
         const isExt = (rest as { external?: boolean }).external;
         return isExt ? (
@@ -108,25 +157,38 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            
             className={linkClass(href)}
-            title={!open ? label : undefined}
+            title={!expanded ? label : undefined}
             aria-label={label}
+            onClick={() => {
+              if (!open) setIsHovered(false);
+            }}
           >
             <Icon size={20} strokeWidth={1.8} className={iconClass(href)} />
-            {open && <span className="text-sm truncate">{label}</span>}
+            {expanded && (
+              <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                {label}
+              </span>
+            )}
           </a>
         ) : (
           <Link
             key={href}
             href={href}
             className={linkClass(href)}
-            title={!open ? label : undefined}
+            title={!expanded ? label : undefined}
             aria-label={label}
-            onClick={onClose}
+            onClick={() => {
+              if (onClose) onClose();
+              if (!open) setIsHovered(false);
+            }}
           >
             <Icon size={20} strokeWidth={1.8} className={iconClass(href)} />
-            {open && <span className="text-sm truncate">{label}</span>}
+            {expanded && (
+              <span className="text-sm truncate transition-opacity duration-200 animate-in fade-in-50">
+                {label}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -144,27 +206,30 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
         />
       )}
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar with hover expansion */}
       <nav
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={`
-          fixed left-0 top-[var(--topbar-height)] bottom-0 z-40
+          fixed left-0 top-[var(--topbar-height)] bottom-0
           bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#272727]
           overflow-y-auto overflow-x-hidden
-          transition-[width] duration-200 ease-out
+          transition-[width,box-shadow] duration-200 ease-out
           sidebar hidden md:block
-          ${open ? "w-[240px]" : "w-[72px]"}
+          ${isExpanded ? "w-[240px]" : "w-[72px]"}
+          ${!open && isHovered ? "z-50 shadow-[4px_0_24px_rgba(0,0,0,0.15)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.7)]" : "z-30"}
         `}
         aria-label="Main navigation"
         role="navigation"
       >
         <div className="px-2 py-2">
-          <NavSection items={primaryNav} />
-          <NavSection title="Explore" items={exploreNav} />
-          <NavSection items={utilityNav} />
+          <NavSection items={primaryNav} expanded={isExpanded} />
+          <NavSection title="Explore" items={exploreNav} expanded={isExpanded} />
+          <NavSection items={utilityNav} expanded={isExpanded} />
 
           {/* Footer info when expanded */}
-          {open && (
-            <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5] dark:border-[#272727]">
+          {isExpanded && (
+            <div className="px-3 py-4 mt-2 border-t border-[#e5e5e5] dark:border-[#272727] transition-opacity duration-200">
               <p className="text-[11px] text-[#909090] dark:text-[#717171] leading-relaxed">
                 © 2026 Sarthak Makkar
               </p>
@@ -174,7 +239,7 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
         </div>
       </nav>
 
-      {/* Mobile drawer (slides in from left) */}
+      {/* Mobile drawer (slides in from left on touch/mobile) */}
       <nav
         className={`
           fixed left-0 top-0 bottom-0 z-40 w-[240px]
@@ -199,9 +264,9 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
           </button>
         </div>
         <div className="px-2 py-2">
-          <NavSection items={primaryNav} />
-          <NavSection title="Explore" items={exploreNav} />
-          <NavSection items={utilityNav} />
+          <NavSection items={primaryNav} expanded={true} />
+          <NavSection title="Explore" items={exploreNav} expanded={true} />
+          <NavSection items={utilityNav} expanded={true} />
         </div>
       </nav>
     </>

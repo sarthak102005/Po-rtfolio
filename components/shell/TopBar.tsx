@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -14,8 +14,12 @@ import {
   User,
   Sun,
   Moon,
+  ArrowRight,
+  ExternalLink,
 } from "lucide-react";
 import { profile } from "@/data/profile";
+import { projects } from "@/data/projects";
+import { searchSidebarItems, SidebarSearchItem } from "@/data/sidebarSearch";
 import { useTheme } from "@/components/context/ThemeContext";
 
 interface TopBarProps {
@@ -27,11 +31,31 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Suggestions for search dropdown
+  const suggestions = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    if (!q) return { projects: [], sidebarItems: [] };
+
+    const matchedProjects = projects
+      .filter((p) => p.name.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q))
+      .slice(0, 4);
+
+    const matchedSidebar = searchSidebarItems(q).slice(0, 4);
+
+    return { projects: matchedProjects, sidebarItems: matchedSidebar };
+  }, [query]);
+
+  const hasSuggestions =
+    query.trim().length > 0 &&
+    (suggestions.projects.length > 0 || suggestions.sidebarItems.length > 0);
 
   // "/" shortcut to focus search
   useEffect(() => {
@@ -43,6 +67,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
       if (e.key === "Escape") {
         setProfileOpen(false);
         setNotifOpen(false);
+        setIsDropdownOpen(false);
         searchRef.current?.blur();
       }
     };
@@ -50,9 +75,12 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Close on outside click
+  // Close dropdown on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
       }
@@ -67,8 +95,23 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setIsDropdownOpen(false);
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     }
+  };
+
+  const handleSelectSidebarItem = (item: SidebarSearchItem) => {
+    setIsDropdownOpen(false);
+    if (item.external) {
+      window.open(item.href, "_blank", "noopener,noreferrer");
+    } else {
+      router.push(item.href);
+    }
+  };
+
+  const handleSelectProject = (slug: string) => {
+    setIsDropdownOpen(false);
+    router.push(`/project/${slug}`);
   };
 
   return (
@@ -77,9 +120,9 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
       style={{ height: "var(--topbar-height)" }}
       role="banner"
     >
-      <div className="flex items-center h-full px-4 gap-2 max-w-[2560px] mx-auto">
+      <div className="flex items-center h-full px-3 sm:px-4 gap-2 max-w-[2560px] mx-auto">
         {/* Left: Hamburger + Logo */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={onMenuClick}
             className="p-2 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] transition-colors"
@@ -93,7 +136,7 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
             className="flex items-center gap-2 group select-none"
             aria-label="Sarthak's Portfolio — Home"
           >
-            {/* Mini play tile */}
+            {/* YouTube Red play tile */}
             <div
               className="flex items-center justify-center rounded-lg"
               style={{
@@ -117,19 +160,23 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
           </Link>
         </div>
 
-        {/* Center: Search */}
-        <div className="flex-1 flex justify-center px-2 sm:px-4 min-w-0">
+        {/* Center: Search Bar + Live Dropdown */}
+        <div ref={searchContainerRef} className="flex-1 flex justify-center px-1 sm:px-4 min-w-0 relative">
           <form
             onSubmit={handleSearch}
-            className="flex items-center w-full max-w-[600px] h-9"
+            className="flex items-center w-full max-w-[600px] h-9 relative"
           >
             <div className="relative flex-1 min-w-0">
               <input
                 ref={searchRef}
                 type="search"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search Sarthak's portfolio (Press '/' to focus)"
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setIsDropdownOpen(true);
+                }}
+                onFocus={() => setIsDropdownOpen(true)}
+                placeholder="Search projects & sidebar (Press '/' to focus)"
                 className="w-full h-9 pl-4 pr-3 text-sm border border-[#d3d3d3] dark:border-[#303030] rounded-l-full focus:outline-none focus:border-[#1c62b9] bg-white dark:bg-[#121212] text-[#0f0f0f] dark:text-[#f1f1f1] placeholder-[#909090] dark:placeholder-[#717171] transition-colors"
                 aria-label="Search portfolio"
               />
@@ -142,29 +189,113 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
               <Search size={16} strokeWidth={2} />
             </button>
           </form>
+
+          {/* YouTube-style Search Result Dropdown */}
+          {isDropdownOpen && hasSuggestions && (
+            <div className="absolute left-1 sm:left-4 right-1 sm:right-4 top-full mt-1.5 max-w-[600px] mx-auto bg-white dark:bg-[#212121] border border-[#e5e5e5] dark:border-[#383838] rounded-2xl shadow-xl z-50 overflow-hidden py-2">
+              {/* Sidebar items suggestions */}
+              {suggestions.sidebarItems.length > 0 && (
+                <div className="pb-1">
+                  <div className="px-4 py-1 text-[11px] font-semibold text-[#808080] dark:text-[#aaaaaa] uppercase tracking-wider">
+                    Navigation & Actions
+                  </div>
+                  {suggestions.sidebarItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelectSidebarItem(item)}
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] transition-colors text-left group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Icon size={16} className="text-[#606060] dark:text-[#aaaaaa] flex-shrink-0" />
+                          <span className="text-sm font-medium text-[#0f0f0f] dark:text-[#f1f1f1] truncate">
+                            {item.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#f2f2f2] dark:bg-[#272727] text-[#606060] dark:text-[#aaaaaa]">
+                            {item.type}
+                          </span>
+                          {item.external ? (
+                            <ExternalLink size={12} className="text-[#909090] dark:text-[#717171]" />
+                          ) : (
+                            <ArrowRight size={12} className="text-[#909090] dark:text-[#717171]" />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Projects suggestions */}
+              {suggestions.projects.length > 0 && (
+                <div className="pt-1 border-t border-[#f2f2f2] dark:border-[#2e2e2e]">
+                  <div className="px-4 py-1 text-[11px] font-semibold text-[#808080] dark:text-[#aaaaaa] uppercase tracking-wider">
+                    Projects
+                  </div>
+                  {suggestions.projects.map((p) => (
+                    <button
+                      key={p.slug}
+                      type="button"
+                      onClick={() => handleSelectProject(p.slug)}
+                      className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#f2f2f2] dark:hover:bg-[#2e2e2e] transition-colors text-left group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Search size={15} className="text-[#606060] dark:text-[#aaaaaa] flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-[#0f0f0f] dark:text-[#f1f1f1] truncate">
+                            {p.name}
+                          </p>
+                          <p className="text-xs text-[#606060] dark:text-[#aaaaaa] truncate">
+                            {p.subtitle}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-[#ff0033] border border-red-500/20 flex-shrink-0">
+                        Project
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* View full search results link */}
+              <div className="pt-2 mt-1 border-t border-[#f2f2f2] dark:border-[#2e2e2e] px-4">
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="w-full py-1.5 text-xs text-center font-medium text-[#065fd4] dark:text-[#3ea6ff] hover:underline"
+                >
+                  View all results for &quot;{query}&quot; →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {/* Resume/Hire CTA */}
+        {/* Right: Actions (SEARCH BAR -> RESUME -> THEME TOGGLE -> NOTIFS -> PROFILE) */}
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          {/* Resume CTA - Visually adjacent to Theme Toggle */}
           <a
             href={profile.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#0f0f0f] dark:border-[#f1f1f1] text-[#0f0f0f] dark:text-[#f1f1f1] text-sm font-medium hover:bg-[#0f0f0f] hover:text-white dark:hover:bg-[#f1f1f1] dark:hover:text-[#0f0f0f] transition-all"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-[#0f0f0f] dark:border-[#f1f1f1] text-[#0f0f0f] dark:text-[#f1f1f1] text-xs sm:text-sm font-medium hover:bg-[#0f0f0f] hover:text-white dark:hover:bg-[#f1f1f1] dark:hover:text-[#0f0f0f] transition-all"
             aria-label="View or download resume"
           >
             <FileText size={14} />
             <span>Resume</span>
           </a>
 
-          {/* Theme switcher */}
+          {/* Theme switcher — Positioned immediately NEXT TO Resume */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] transition-colors relative"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-            title={`Appearance: ${theme === "dark" ? "Dark" : "Light"}`}
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           >
             {theme === "dark" ? (
               <Sun size={20} strokeWidth={1.8} className="text-[#f1f1f1]" />
@@ -176,7 +307,10 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
           {/* Notifications */}
           <div ref={notifRef} className="relative">
             <button
-              onClick={() => { setNotifOpen((v) => !v); setProfileOpen(false); }}
+              onClick={() => {
+                setNotifOpen((v) => !v);
+                setProfileOpen(false);
+              }}
               className="p-2 rounded-full hover:bg-[#f2f2f2] dark:hover:bg-[#272727] text-[#0f0f0f] dark:text-[#f1f1f1] transition-colors relative"
               aria-label="Notifications"
             >
@@ -190,7 +324,9 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                 </div>
                 <div className="px-4 py-3">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#ff0033] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">S</div>
+                    <div className="w-8 h-8 rounded-full bg-[#ff0033] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      S
+                    </div>
                     <div>
                       <p className="text-sm text-[#0f0f0f] dark:text-[#f1f1f1] font-medium">New project added</p>
                       <p className="text-xs text-[#606060] dark:text-[#aaaaaa]">Quantum Scraper — AI/GenAI</p>
@@ -200,7 +336,9 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                 </div>
                 <div className="px-4 py-3 border-t border-[#f2f2f2] dark:border-[#2e2e2e]">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#ff0033] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">S</div>
+                    <div className="w-8 h-8 rounded-full bg-[#ff0033] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      S
+                    </div>
                     <div>
                       <p className="text-sm text-[#0f0f0f] dark:text-[#f1f1f1] font-medium">Internship completed</p>
                       <p className="text-xs text-[#606060] dark:text-[#aaaaaa]">ShortHills AI — Technology Intern</p>
@@ -215,7 +353,10 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
           {/* Profile avatar */}
           <div ref={profileRef} className="relative">
             <button
-              onClick={() => { setProfileOpen((v) => !v); setNotifOpen(false); }}
+              onClick={() => {
+                setProfileOpen((v) => !v);
+                setNotifOpen(false);
+              }}
               className="w-8 h-8 rounded-full bg-[#ff0033] flex items-center justify-center text-white font-bold text-sm hover:ring-2 hover:ring-[#ff0033] hover:ring-offset-1 transition-all"
               aria-label="Profile menu"
               aria-expanded={profileOpen}
@@ -231,7 +372,9 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                     S
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] truncate">{profile.name.full}</p>
+                    <p className="text-sm font-semibold text-[#0f0f0f] dark:text-[#f1f1f1] truncate">
+                      {profile.name.full}
+                    </p>
                     <p className="text-xs text-[#606060] dark:text-[#aaaaaa] truncate">{profile.handle}</p>
                   </div>
                 </div>
@@ -250,7 +393,6 @@ export default function TopBar({ onMenuClick, sidebarOpen }: TopBarProps) {
                     href={profile.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727] transition-colors"
                   >
