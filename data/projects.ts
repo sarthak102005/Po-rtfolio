@@ -190,6 +190,7 @@ export const projects: Project[] = [
     ],
     thumbnail: "/projects/ask-wiki/ss1.png",
     githubUrl: "https://github.com/sarthak102005/Ask-Wiki",
+    liveUrl: "https://huggingface.co/spaces/sarthak1001/ai-wikipedia-rag",
     stack: [
       "Python",
       "RAG",
@@ -240,6 +241,7 @@ export const projects: Project[] = [
     ],
     thumbnail: "/projects/briefly/ss1.png",
     githubUrl: "https://github.com/sarthak102005/Brief.ly",
+    liveUrl: "https://brief-ly-eight.vercel.app/",
     stack: ["FastAPI", "PostgreSQL", "Redis", "React", "Docker Compose"],
     summary:
       "High-performance URL shortener with Redis cache-aside resolution, per-user/IP rate limiting, and real-time click analytics dashboard.",
