@@ -19,11 +19,14 @@ import {
   Globe,
   Brain,
   FolderGit2,
+  X,
 } from "lucide-react";
 
 interface GuideSidebarProps {
   open: boolean;
   onClose?: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 const primaryNav = [
@@ -57,7 +60,7 @@ const utilityNav = [
     external: true,
   },
   {
-    href: "https://linkedin.com/in/sarthakmakkar10",
+    href: "https://www.linkedin.com/in/sarthakmakkar10/",
     label: "LinkedIn",
     icon: Link2,
     external: true,
@@ -65,10 +68,38 @@ const utilityNav = [
   { href: "/contact", label: "Contact", icon: Mail, external: false },
 ];
 
-export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
+export default function GuideSidebar({
+  open,
+  onClose,
+  mobileOpen = false,
+  onMobileClose,
+}: GuideSidebarProps) {
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close mobile drawer on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen && onMobileClose) {
+        onMobileClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen, onMobileClose]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   // Clear hover state when pinned open state changes
   useEffect(() => {
@@ -106,20 +137,21 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
     }, 150);
   };
 
-  // Effective expanded state (either explicitly open or hovered on desktop)
+  // Effective expanded state for desktop
   const isExpanded = open || isHovered;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     if (href.startsWith("/projects?filter=")) {
-      // Handled via URL params if on projects page
       return false;
     }
     return pathname.startsWith(href);
   };
 
-  const linkClass = (href: string) =>
+  const linkClass = (href: string, isMobile = false) =>
     `flex items-center gap-5 px-3 py-2.5 rounded-xl transition-all duration-150 text-sm group select-none ${
+      isMobile ? "min-h-[44px]" : ""
+    } ${
       isActive(href)
         ? "bg-[#f2f2f2] dark:bg-[#272727] font-semibold text-[#0f0f0f] dark:text-[#f1f1f1]"
         : "text-[#0f0f0f] dark:text-[#f1f1f1] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
@@ -136,10 +168,14 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
     title,
     items,
     expanded,
+    isMobile = false,
+    onNavigate,
   }: {
     title?: string;
     items: typeof primaryNav;
     expanded: boolean;
+    isMobile?: boolean;
+    onNavigate?: () => void;
   }) => (
     <div className="py-2">
       {title && expanded && (
@@ -157,10 +193,11 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className={linkClass(href)}
+            className={linkClass(href, isMobile)}
             title={!expanded ? label : undefined}
             aria-label={label}
             onClick={() => {
+              if (onNavigate) onNavigate();
               if (!open) setIsHovered(false);
             }}
           >
@@ -175,11 +212,11 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
           <Link
             key={href}
             href={href}
-            className={linkClass(href)}
+            className={linkClass(href, isMobile)}
             title={!expanded ? label : undefined}
             aria-label={label}
             onClick={() => {
-              if (onClose) onClose();
+              if (onNavigate) onNavigate();
               if (!open) setIsHovered(false);
             }}
           >
@@ -197,16 +234,9 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
 
   return (
     <>
-      {/* Mobile overlay */}
-      {open && onClose && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Desktop sidebar with hover expansion */}
+      {/* ========================================================================= */}
+      {/* Desktop sidebar with smooth hover expansion (72px -> 240px)                */}
+      {/* ========================================================================= */}
       <nav
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -239,36 +269,79 @@ export default function GuideSidebar({ open, onClose }: GuideSidebarProps) {
         </div>
       </nav>
 
-      {/* Mobile drawer (slides in from left on touch/mobile) */}
-      <nav
+      {/* ========================================================================= */}
+      {/* Mobile Drawer (slides in from the RIGHT when hamburger is tapped)         */}
+      {/* Requirement 14 & 15: Opaque dark dashboard, starts closed on fresh load   */}
+      {/* ========================================================================= */}
+      {/* Mobile backdrop dim */}
+      <div
+        className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-50 md:hidden transition-opacity duration-300 ${
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onMobileClose}
+        aria-hidden="true"
+      />
+
+      {/* Right-side mobile navigation drawer */}
+      <aside
         className={`
-          fixed left-0 top-0 bottom-0 z-40 w-[240px]
-          bg-white dark:bg-[#0f0f0f] border-r border-[#e5e5e5] dark:border-[#272727]
-          overflow-y-auto overflow-x-hidden
-          transition-transform duration-200 ease-out
+          fixed right-0 top-0 bottom-0 z-50 w-[290px] max-w-[85vw]
+          bg-[#0f0f0f] border-l border-[#272727] text-[#f1f1f1]
+          shadow-2xl overflow-y-auto overflow-x-hidden
+          transition-transform duration-300 ease-out
           md:hidden
-          ${open ? "translate-x-0" : "-translate-x-full"}
+          ${mobileOpen ? "translate-x-0" : "translate-x-full"}
         `}
         aria-label="Mobile navigation"
+        role="dialog"
+        aria-modal={mobileOpen}
       >
-        <div className="p-4 border-b border-[#e5e5e5] dark:border-[#272727] flex items-center justify-between">
-          <span className="font-bold text-[#0f0f0f] dark:text-[#f1f1f1] text-base">
-            Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
-          </span>
+        {/* Header inside drawer */}
+        <div className="p-4 border-b border-[#272727] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#ff0033] flex items-center justify-center text-white flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="white" width={14} height={14} style={{ marginLeft: 2 }}>
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+            <span className="font-bold text-[#f1f1f1] text-base">
+              Sarthak<span className="text-[#ff0033]">&apos;s</span> Portfolio
+            </span>
+          </div>
           <button
-            onClick={onClose}
-            className="p-1 rounded-full text-[#606060] dark:text-[#aaaaaa] hover:bg-[#f2f2f2] dark:hover:bg-[#272727]"
-            aria-label="Close drawer"
+            onClick={onMobileClose}
+            className="p-2 rounded-full text-[#aaaaaa] hover:text-white hover:bg-[#272727] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+            aria-label="Close navigation"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
-        <div className="px-2 py-2">
-          <NavSection items={primaryNav} expanded={true} />
-          <NavSection title="Explore" items={exploreNav} expanded={true} />
-          <NavSection items={utilityNav} expanded={true} />
+
+        {/* Dedicated Resume Download Button in Drawer */}
+        <div className="p-4 border-b border-[#272727]">
+          <a
+            href="/Sarthak_Resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onMobileClose}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#ff0033] hover:bg-[#cc0000] text-white font-semibold text-sm shadow-md transition-all min-h-[44px]"
+          >
+            <FileText size={16} />
+            <span>Download Resume (PDF)</span>
+          </a>
         </div>
-      </nav>
+
+        {/* Navigation items */}
+        <div className="px-2 py-3">
+          <NavSection items={primaryNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
+          <NavSection title="Explore" items={exploreNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
+          <NavSection items={utilityNav} expanded={true} isMobile={true} onNavigate={onMobileClose} />
+        </div>
+
+        <div className="px-4 py-4 mt-2 border-t border-[#272727]">
+          <p className="text-xs text-[#717171]">© 2026 Sarthak Makkar · Delhi, India</p>
+        </div>
+      </aside>
     </>
   );
 }

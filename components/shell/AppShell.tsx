@@ -14,16 +14,26 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Desktop sidebar pinned state (can be remembered on desktop)
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  // Mobile drawer state — MUST ALWAYS BE FALSE ON INITIAL LOAD
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Restore sidebar state from localStorage
+    // Initial scroll position must be top of page (Requirement 16)
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+
+    // Restore desktop sidebar state from localStorage only if screen is desktop width
     try {
-      const saved = localStorage.getItem(SIDEBAR_KEY);
-      if (saved !== null) setSidebarOpen(saved === "true");
+      if (typeof window !== "undefined" && window.innerWidth >= 768) {
+        const saved = localStorage.getItem(SIDEBAR_KEY);
+        if (saved !== null) setDesktopSidebarOpen(saved === "true");
+      }
     } catch {}
 
     // Check if splash already shown this session
@@ -35,21 +45,31 @@ export default function AppShell({ children }: AppShellProps) {
     }
   }, []);
 
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen((prev) => {
-      const next = !prev;
-      try { localStorage.setItem(SIDEBAR_KEY, String(next)); } catch {}
-      return next;
-    });
+  const handleMenuClick = useCallback(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      // On mobile, toggle mobile drawer (always starts closed)
+      setMobileDrawerOpen((prev) => !prev);
+    } else {
+      // On desktop, toggle pinned desktop sidebar
+      setDesktopSidebarOpen((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem(SIDEBAR_KEY, String(next));
+        } catch {}
+        return next;
+      });
+    }
   }, []);
 
   const handleSplashComplete = useCallback(() => {
     setSplashDone(true);
-    try { sessionStorage.setItem(SPLASH_KEY, "true"); } catch {}
+    try {
+      sessionStorage.setItem(SPLASH_KEY, "true");
+    } catch {}
   }, []);
 
-  // Main content left offset based on sidebar state (desktop only)
-  const contentLeft = sidebarOpen ? 240 : 72;
+  // Main content left offset based on desktop sidebar state
+  const contentLeft = desktopSidebarOpen ? 240 : 72;
 
   if (!mounted) {
     // SSR / hydration placeholder — show nothing to avoid flash
@@ -66,11 +86,17 @@ export default function AppShell({ children }: AppShellProps) {
         className="min-h-screen bg-white dark:bg-[#0f0f0f] text-[#0f0f0f] dark:text-[#f1f1f1] transition-colors duration-200"
         style={{ opacity: splashDone ? 1 : 0, transition: "opacity 0.3s ease" }}
       >
-        <TopBar onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />
+        <TopBar
+          onMenuClick={handleMenuClick}
+          sidebarOpen={desktopSidebarOpen}
+          mobileMenuOpen={mobileDrawerOpen}
+        />
 
         <GuideSidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+          open={desktopSidebarOpen}
+          onClose={() => setDesktopSidebarOpen(false)}
+          mobileOpen={mobileDrawerOpen}
+          onMobileClose={() => setMobileDrawerOpen(false)}
         />
 
         {/* Main content area — offset for desktop sidebar */}
